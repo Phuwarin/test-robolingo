@@ -5,13 +5,15 @@ LINE OA admin webchat. Repository: https://github.com/Phuwarin/test-robolingo
 ## Structure
 
 - `apps/web`: Next.js + TypeScript + shadcn/ui, port 3099.
-- `apps/api`: standalone Hono + Node.js + TypeScript, port 4099.
+- `apps/api`: standalone Hono + Bun + TypeScript, port 4099.
 
-Each app owns its package.json, package-lock.json, node_modules, environment files and Prettier (printWidth 200). No npm workspaces or shared dependencies. There is no root package or scripts directory.
+Each app owns its package.json, bun.lock, node_modules, environment files and Prettier (printWidth 200). No workspaces or shared dependencies. There is no root package or scripts directory.
 
 ## Run
 
-Open two terminals. In `apps/web`, run `npm ci` then `npm run dev`. In `apps/api`, run `npm ci` then `npm run dev`. Web: http://localhost:3099. API health: http://localhost:4099/health.
+Requires Bun 1.4.2 or newer. Bun automatically loads environment files from each app directory.
+
+Open two terminals. In `apps/web`, run `bun install --frozen-lockfile` then `bun run dev`. In `apps/api`, run `bun install --frozen-lockfile` then `bun run dev`. Web: http://localhost:3099. API health: http://localhost:4099/health.
 
 Web uses `/api/*` through a Next.js reverse proxy. The actual handlers, LINE integration, database access and session verification run exclusively in the separate API service. Demo mode opens directly with sample conversations and never sends LINE messages.
 
@@ -23,11 +25,11 @@ LINE webhook: public HTTPS API URL followed by `/api/webhook`. Verify and enable
 
 ## Deploy
 
-Deploy web and API independently. For Vercel web, select `apps/web` as Root Directory, build with `npm run build`, and set API_PROXY_URL to the publicly hosted API's HTTPS origin. Set WEB_ORIGIN on the API to the web's exact HTTPS origin. Host the API as a Node.js service with `npm run build` and `npm start`, using the platform's PORT environment variable. The standalone API is no longer deployed as Next.js Route Handlers. Deploying it on a functions platform requires a suitable adapter.
+Deploy web and API independently. For Vercel web, select `apps/web` as Root Directory, build with `bun run build`, and set API_PROXY_URL to the publicly hosted API's HTTPS origin. Set WEB_ORIGIN on the API to the web's exact HTTPS origin. Host the API as a Bun service with `bun run build` and `bun run start`, using the platform's PORT environment variable. The standalone API is no longer deployed as Next.js Route Handlers. Deploying it on a functions platform requires a suitable adapter.
 
 ## Checks
 
-In each app run `npm run format`, `npm run format:check`, `npm run typecheck`, and `npm run build`. In API also run `npm test`.
+In each app run `bun run format`, `bun run format:check`, `bun run typecheck`, and `bun run build`. In API also run `bun test`.
 
 ## Submission
 
