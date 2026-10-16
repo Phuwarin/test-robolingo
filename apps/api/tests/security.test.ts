@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { validSignature, token, validToken } from "../src/security";
+import { validSignature, token, validToken } from "../src/common/security";
 test("webhook verifies original bytes and rejects tampering", () => {
   const body = '{"events":[]}';
   const signature = createHmac("sha256", "secret").update(body).digest("base64");

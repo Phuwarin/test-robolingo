@@ -1,4 +1,4 @@
-import { equal, token } from "../security.js";
+import { equal, token } from "../../common/security.js";
 export async function POST(request: Request) {
   const password = process.env.ADMIN_PASSWORD,
     secret = process.env.SESSION_SECRET;
