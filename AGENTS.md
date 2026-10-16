@@ -7,3 +7,5 @@
 - Root contains only apps/, .vscode/, .gitignore, AGENTS.md and README.md (plus Git metadata). Run commands inside the individual apps; do not add a root package or scripts folder.
 
 - Use Bun exclusively for package installation, runtime, scripts and tests. Keep a separate bun.lock per app; do not add npm/yarn/pnpm lockfiles.
+
+- Do not commit or push unless the user explicitly requests it.

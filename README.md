@@ -13,13 +13,13 @@ Each app owns its package.json, bun.lock, node_modules, environment files and Pr
 
 Requires Bun 1.4.2 or newer. Bun automatically loads environment files from each app directory.
 
-Open two terminals. In `apps/web`, run `bun install --frozen-lockfile` then `bun run dev`. In `apps/api`, run `bun install --frozen-lockfile` then `bun run dev`. Web: http://localhost:3099. API health: http://localhost:4099/health.
+Open two terminals. In `apps/web`, run `bun install --frozen-lockfile` then `bun run dev`. In `apps/api`, run `bun install --frozen-lockfile` then `bun run dev`. Web: http://localhost:3099. API health: http://localhost:4099/api/health.
 
-Web uses `/api/*` through a Next.js reverse proxy. The actual handlers, LINE integration, database access and session verification run exclusively in the separate API service. Demo mode opens directly with sample conversations and never sends LINE messages.
+Web uses `/api/*` through a Next.js reverse proxy. The actual handlers, LINE integration and database access run exclusively in the separate API service. Demo mode opens directly with sample conversations and never sends LINE messages.
 
 ## Configuration
 
-Copy each app's `.env.example` to `.env.local` (web) or `.env` (API). LINE credentials, DATABASE_URL, ADMIN_PASSWORD and SESSION_SECRET belong only to the API. Run `apps/api/schema.sql` in PostgreSQL before live use. Set a strong admin password and a random session secret of at least 32 bytes. Login UI is currently removed for design preview; live endpoints remain protected.
+Copy each app's `.env.example` to `.env.local` (web) or `.env` (API). LINE credentials and DATABASE_URL belong only to the API. Run `bun run db:migrate` inside apps/api before live use. This creates the new schema or migrates existing contacts to line_users and messages.contact_id to line_user_id. Authentication is currently removed for this development phase; conversation and messaging endpoints do not require a login.
 
 LINE webhook: public HTTPS API URL followed by `/api/webhook`. Verify and enable webhooks and redelivery in LINE Developers. Local testing requires an HTTPS tunnel. Add the OA as a friend using LINE and send a message to test incoming messages. Non-text messages show a type placeholder. Outgoing messages support text only. Groups are ignored.
 
@@ -35,4 +35,16 @@ In each app run `bun run format`, `bun run format:check`, `bun run typecheck`, a
 
 Provide the real LINE OA add-friend URL, production web URL and public GitHub repository URL after service configuration and deployment.
 
-API uses NestJS modules, controllers, injectable services and an auth guard. `bun run dev` runs src/main.ts with Bun watch, while `bun run build` compiles with TypeScript (including decorator metadata) and `bun run start` runs dist/main.js on Bun.
+API uses NestJS modules, controllers, injectable services without an auth module. `bun run dev` runs src/main.ts with Bun watch, while `bun run build` compiles with TypeScript (including decorator metadata) and `bun run start` runs dist/main.js on Bun.
+
+## Follow event
+
+Webhook `follow` (friend addition or unblock) stores the LINE user ID, available display name/photo, friend_status=friend and the event timestamp. Profile fetch failure preserves the user record using the ID as fallback. Existing users without follow evidence remain unknown. Repeated follow events upsert the same contact and create no messages. Run `apps/api/migrations/001_follow_status.sql` for an existing database, or use the updated schema.sql for a new database. Live database verification is pending configuration. Unfollow handling is not yet implemented.
+
+## Sequelize
+
+The API uses @nestjs/sequelize, sequelize-typescript and the pg PostgreSQL driver. Services inject LineUser and Message models directly; there is no repository layer. Models declare the one-to-many relationship. Automatic sync/alter is disabled. Run `bun run db:migrate` explicitly before live requests. Database connections are lazy so the health endpoint can run before DATABASE_URL is configured; data endpoints still require a reachable PostgreSQL database. Existing friend status values migrate to follow. The API response keeps contacts/contact_id aliases for compatibility with the current web UI. Fresh-schema migration, writes, reads, associations and conversation queries were verified against local Docker PostgreSQL. The migration path from an existing older schema still requires validation.
+
+## Local PostgreSQL
+
+From apps/api run `bun run db:up` to start PostgreSQL 18 on 127.0.0.1:5433, database/user line_desk, then `bun run db:migrate`. Password and DATABASE_URL are stored in the ignored API .env. The compose project is test-robolingo with a dedicated postgres_data volume. `bun run db:down` stops the container and keeps its data. SequelizeModule.forRootAsync is configured in AppModule; feature modules register their models with forFeature.
