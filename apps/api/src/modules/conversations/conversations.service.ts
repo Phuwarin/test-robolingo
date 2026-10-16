@@ -22,14 +22,8 @@ export class ConversationsService {
     const previews = new Map<string, string>();
     for (const message of rows) previews.set(message.lineUserId, message.body);
     return {
-      contacts: users.map((user) => ({
-        ...user,
-        preview: previews.get(user.id) || "",
-      })),
-      messages: rows.map((message) => ({
-        ...message,
-        contactId: message.lineUserId,
-      })),
+      contacts: users.map((user) => ({ ...user, preview: previews.get(user.id) || "" })),
+      messages: rows.map((message) => ({ ...message, contactId: message.lineUserId })),
     };
   }
 }

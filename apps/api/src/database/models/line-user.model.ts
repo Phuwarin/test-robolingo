@@ -10,20 +10,13 @@ export class LineUser extends Model {
   @Column(DataType.TEXT)
   declare id: string;
 
-  @Column({
-    type: DataType.TEXT,
-    allowNull: false,
-  })
+  @Column({ type: DataType.TEXT, allowNull: false })
   declare name: string;
 
   @Column(DataType.TEXT)
   declare pictureUrl: string | null;
 
-  @Column({
-    type: DataType.TEXT,
-    allowNull: false,
-    defaultValue: "unknown",
-  })
+  @Column({ type: DataType.TEXT, allowNull: false, defaultValue: "unknown" })
   declare friendStatus: string;
 
   @Column(DataType.DATE)
@@ -34,19 +27,11 @@ export class LineUser extends Model {
 
   // Timestamps
   @CreatedAt
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    defaultValue: DataType.NOW,
-  })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   declare createdAt: Date;
 
   @UpdatedAt
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    defaultValue: DataType.NOW,
-  })
+  @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
   declare updatedAt: Date;
 
   // Relations

@@ -15,18 +15,8 @@ export class MessagesService {
     if (await this.messages.findByPk(data.id)) return true;
     await line("message/push", {
       method: "POST",
-      headers: {
-        "X-Line-Retry-Key": data.id,
-      },
-      body: JSON.stringify({
-        to: data.to,
-        messages: [
-          {
-            type: "text",
-            text: data.text.trim(),
-          },
-        ],
-      }),
+      headers: { "X-Line-Retry-Key": data.id },
+      body: JSON.stringify({ to: data.to, messages: [{ type: "text", text: data.text.trim() }] }),
     });
     await this.database.transaction(async (transaction) => {
       const user = await this.users.findByPk(data.to, {
@@ -35,21 +25,12 @@ export class MessagesService {
       });
       if (!user) throw new Error("User no longer exists");
       await this.messages.findOrCreate({
-        where: {
-          id: data.id,
-        },
-        defaults: {
-          id: data.id,
-          lineUserId: data.to,
-          direction: "botSent",
-          body: data.text.trim(),
-        },
+        where: { id: data.id },
+        defaults: { id: data.id, lineUserId: data.to, direction: "botSent", body: data.text.trim() },
         transaction,
       });
       const latest = await this.messages.findOne({
-        where: {
-          lineUserId: data.to,
-        },
+        where: { lineUserId: data.to },
         order: [
           ["createdAt", "DESC"],
           ["id", "DESC"],

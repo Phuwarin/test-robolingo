@@ -13,7 +13,7 @@ Each app owns its package.json, bun.lock, node_modules, environment files and Pr
 
 Requires Bun 1.4.2 or newer. Bun automatically loads environment files from each app directory.
 
-Open two terminals. In `apps/web`, run `bun install --frozen-lockfile` then `bun run dev`. In `apps/api`, run `bun install --frozen-lockfile` then `bun run dev`. Web: http://localhost:3099. API health: http://localhost:4099/api/health.
+Open two terminals. In `apps/web`, run `bun install --frozen-lockfile` then `bun run dev`. In `apps/api`, run `bun install --frozen-lockfile` then `bun run dev`. Web: http://localhost:3099. API: http://localhost:4099/api.
 
 Web uses `/api/*` through a Next.js reverse proxy. The actual handlers, LINE integration and database access run exclusively in the separate API service. Demo mode opens directly with sample conversations and never sends LINE messages.
 
@@ -43,7 +43,7 @@ Webhook `follow` (friend addition or unblock) stores the LINE user ID, available
 
 ## Sequelize
 
-The API uses @nestjs/sequelize, sequelize-typescript and the pg PostgreSQL driver. Services inject LineUser and Message models directly; there is no repository layer. Models declare the one-to-many relationship. Automatic sync/alter is disabled. Run `bun run db:migrate` explicitly before live requests. Database connections are lazy so the health endpoint can run before DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD is configured; data endpoints still require a reachable PostgreSQL database. Existing friend status values migrate to follow. Model attributes and API response properties use camelCase; PostgreSQL columns use snake_case through underscored: true. Fresh-schema migration, writes, reads, associations and conversation queries were verified against local Docker PostgreSQL. The migration path from an existing older schema still requires validation.
+The API uses @nestjs/sequelize, sequelize-typescript and the pg PostgreSQL driver. Services inject LineUser and Message models directly; there is no repository layer. Models declare the one-to-many relationship. Automatic sync/alter is disabled. Run `bun run db:migrate` explicitly before live requests. Database connections are lazy; data endpoints require a reachable PostgreSQL database. Existing friend status values migrate to follow. Model attributes and API response properties use camelCase; PostgreSQL columns use snake_case through underscored: true. Fresh-schema migration, writes, reads, associations and conversation queries were verified against local Docker PostgreSQL. The migration path from an existing older schema still requires validation.
 
 ## Local PostgreSQL
 

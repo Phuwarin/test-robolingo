@@ -2,7 +2,6 @@ import { LineUsersModule } from "./modules/line-users/line-users.module.js";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { LineUser, Message } from "./database/models/index.js";
 import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller.js";
 import { ConversationsModule } from "./modules/conversations/conversations.module.js";
 import { MessagesModule } from "./modules/messages/messages.module.js";
 import { WebhookModule } from "./modules/webhook/webhook.module.js";
@@ -21,14 +20,8 @@ import { WebhookModule } from "./modules/webhook/webhook.module.js";
         synchronize: false,
         logging: false,
         manualInitialization: true,
-        pool: {
-          max: 5,
-          min: 0,
-          idle: 10000,
-        },
-        dialectOptions: {
-          connectionTimeoutMillis: 5000,
-        },
+        pool: { max: 5, min: 0, idle: 10000 },
+        dialectOptions: { connectionTimeoutMillis: 5000 },
       }),
     }),
     LineUsersModule,
@@ -36,6 +29,5 @@ import { WebhookModule } from "./modules/webhook/webhook.module.js";
     MessagesModule,
     WebhookModule,
   ],
-  controllers: [AppController],
 })
 export class AppModule {}

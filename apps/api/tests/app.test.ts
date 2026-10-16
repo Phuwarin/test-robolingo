@@ -16,8 +16,6 @@ afterAll(async () => {
   await app?.close();
 });
 test("Nest endpoints work without an auth module", async () => {
-  const health = await fetch(`${base}/api/health`);
-  assert.equal(health.status, 200);
   assert.equal((await fetch(`${base}/api/login`, { method: "POST" })).status, 404);
   const service = app.get(ConversationsService);
   const original = service.listConversations;

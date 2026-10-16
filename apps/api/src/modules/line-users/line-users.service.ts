@@ -7,27 +7,8 @@ export class LineUsersService {
   constructor(@InjectModel(LineUser) private readonly users: typeof LineUser) {}
   async list(query: string, status: string, page: number, limit: number) {
     const where: WhereOptions = {
-      ...(status
-        ? {
-            friendStatus: status,
-          }
-        : {}),
-      ...(query
-        ? {
-            [Op.or]: [
-              {
-                name: {
-                  [Op.iLike]: `%${query}%`,
-                },
-              },
-              {
-                id: {
-                  [Op.iLike]: `%${query}%`,
-                },
-              },
-            ],
-          }
-        : {}),
+      ...(status ? { friendStatus: status } : {}),
+      ...(query ? { [Op.or]: [{ name: { [Op.iLike]: `%${query}%` } }, { id: { [Op.iLike]: `%${query}%` } }] } : {}),
     };
     const { rows, count } = await this.users.findAndCountAll({
       where,

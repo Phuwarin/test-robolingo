@@ -9,3 +9,5 @@
 - Use Bun exclusively for package installation, runtime, scripts and tests. Keep a separate bun.lock per app; do not add npm/yarn/pnpm lockfiles.
 
 - Do not commit or push unless the user explicitly requests it.
+
+- In API code, keep main query/options objects multiline (where, defaults, transaction on separate lines). Nested objects may stay on one line when Prettier printWidth 200 permits. Do not expand every nested property onto its own line.

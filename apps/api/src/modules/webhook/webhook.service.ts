@@ -39,14 +39,8 @@ export class WebhookService {
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
       const [user] = await this.users.findOrCreate({
-        where: {
-          id: userId,
-        },
-        defaults: {
-          id: userId,
-          name: name || userId,
-          updatedAt: at,
-        },
+        where: { id: userId },
+        defaults: { id: userId, name: name || userId, updatedAt: at },
         transaction,
       });
       await user.reload({
@@ -63,22 +57,12 @@ export class WebhookService {
         },
       );
       await this.messages.findOrCreate({
-        where: {
-          id: message.id,
-        },
-        defaults: {
-          id: message.id,
-          lineUserId: userId,
-          direction: "received",
-          body: message.type === "text" ? message.text || "" : `[${message.type}]`,
-          createdAt: at,
-        },
+        where: { id: message.id },
+        defaults: { id: message.id, lineUserId: userId, direction: "received", body: message.type === "text" ? message.text || "" : `[${message.type}]`, createdAt: at },
         transaction,
       });
       const latest = await this.messages.findOne({
-        where: {
-          lineUserId: userId,
-        },
+        where: { lineUserId: userId },
         order: [
           ["createdAt", "DESC"],
           ["id", "DESC"],
@@ -109,15 +93,8 @@ export class WebhookService {
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
       const [user] = await this.users.findOrCreate({
-        where: {
-          id: userId,
-        },
-        defaults: {
-          id: userId,
-          name: name || userId,
-          friendStatus: "unknown",
-          updatedAt: at,
-        },
+        where: { id: userId },
+        defaults: { id: userId, name: name || userId, friendStatus: "unknown", updatedAt: at },
         transaction,
       });
       await user.reload({
@@ -144,15 +121,8 @@ export class WebhookService {
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
       const [user] = await this.users.findOrCreate({
-        where: {
-          id: userId,
-        },
-        defaults: {
-          id: userId,
-          name: userId,
-          friendStatus: "unknown",
-          updatedAt: at,
-        },
+        where: { id: userId },
+        defaults: { id: userId, name: userId, friendStatus: "unknown", updatedAt: at },
         transaction,
       });
       await user.reload({
