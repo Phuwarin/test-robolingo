@@ -1,5 +1,5 @@
 import { SequelizeModule } from "@nestjs/sequelize";
-import { LineUser, Message } from "./database/models.js";
+import { LineUser, Message } from "./database/models/index.js";
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller.js";
 import { ConversationsModule } from "./modules/conversations/conversations.module.js";
