@@ -1,9 +1,7 @@
-import { Body, Controller, Post, HttpCode, Inject, Req, UseGuards, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException } from "@nestjs/common";
+import { Body, Controller, Post, HttpCode, Inject, Req, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException } from "@nestjs/common";
 import type { Request } from "express";
-import { AuthGuard } from "../auth/auth.guard.js";
 import { MessagesService } from "./messages.service.js";
-@Controller("api/messages")
-@UseGuards(AuthGuard)
+@Controller("messages")
 export class MessagesController {
   constructor(@Inject(MessagesService) private readonly service: MessagesService) {}
   @Post()

@@ -4,7 +4,7 @@ import type { Request } from "express";
 import { validSignature } from "../../common/security.js";
 import { WebhookService } from "./webhook.service.js";
 import type { LineEvent } from "./webhook.types.js";
-@Controller("api/webhook")
+@Controller("webhook")
 export class WebhookController {
   constructor(@Inject(WebhookService) private readonly service: WebhookService) {}
   @Post()

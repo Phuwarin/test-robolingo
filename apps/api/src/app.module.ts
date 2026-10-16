@@ -10,7 +10,11 @@ import { WebhookModule } from "./modules/webhook/webhook.module.js";
     SequelizeModule.forRootAsync({
       useFactory: () => ({
         dialect: "postgres" as const,
-        uri: process.env.DATABASE_URL || "postgres://localhost/line_desk",
+        host: process.env.DB_HOST || "127.0.0.1",
+        port: Number(process.env.DB_PORT || 5433),
+        database: process.env.DB_NAME || "line_desk",
+        username: process.env.DB_USER || "line_desk",
+        password: process.env.DB_PASSWORD,
         models: [LineUser, Message],
         autoLoadModels: false,
         synchronize: false,

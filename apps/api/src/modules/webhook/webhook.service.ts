@@ -1,32 +1,81 @@
 import { Injectable } from "@nestjs/common";
-import { db } from "../../database/client.js";
+import { InjectModel, InjectConnection } from "@nestjs/sequelize";
+import { Sequelize } from "sequelize-typescript";
+import { LineUser, Message } from "../../database/models/index.js";
 import { line } from "../../integrations/line/line.client.js";
 import type { LineEvent } from "./webhook.types.js";
 @Injectable()
 export class WebhookService {
+  constructor(
+    @InjectModel(LineUser) private readonly users: typeof LineUser,
+    @InjectModel(Message) private readonly messages: typeof Message,
+    @InjectConnection() private readonly database: Sequelize,
+  ) {}
   async processEvents(events: LineEvent[]) {
+    console.log(
+      "Processing events:",
+      events.map((e) => e.type),
+    );
     for (const event of events) {
-      const user = event.source?.userId;
-      if (event.source?.type !== "user" || !user) continue;
+      const type = event.type;
+      const userId = event.source?.userId;
+      if (event.source?.type !== "user" || !userId) continue;
+      if (event.type === "follow") {
+        await this.handleFollow(userId, event.timestamp);
+        continue;
+      }
       if (event.type === "unsend" && event.unsend) {
-        const sql = db();
-        await sql`DELETE FROM messages WHERE id=${event.unsend.messageId} AND contact_id=${user}`;
+        await this.messages.destroy({ where: { id: event.unsend.messageId, line_user_id: userId } });
         continue;
       }
       if (event.type !== "message" || !event.message) continue;
-      const sql = db();
-      let name = user;
+      let name: string | null = null;
       try {
-        const profile = await (await line(`profile/${encodeURIComponent(user)}`)).json();
-        name = profile.displayName || user;
+        const profile = await (await line(`profile/${encodeURIComponent(userId)}`)).json();
+        name = profile.displayName || null;
       } catch {
-        /* Profile may be unavailable. Preserve the user ID. */
+        /* Preserve the user ID if the profile cannot be loaded. */
       }
-      const text = event.message.type === "text" ? event.message.text || "" : `[${event.message.type}]`;
-      await sql.transaction([
-        sql`INSERT INTO contacts(id,name,updated_at) VALUES(${user},${name},${new Date(event.timestamp).toISOString()}) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,updated_at=GREATEST(contacts.updated_at,EXCLUDED.updated_at)`,
-        sql`INSERT INTO messages(id,contact_id,direction,body,created_at) VALUES(${event.message.id},${user},'in',${text},${new Date(event.timestamp).toISOString()}) ON CONFLICT(id) DO NOTHING`,
-      ]);
+      const at = new Date(event.timestamp),
+        message = event.message;
+      await this.database.transaction(async (transaction) => {
+        const [user] = await this.users.findOrCreate({ where: { id: userId }, defaults: { id: userId, name: name || userId, updated_at: at }, transaction });
+        await user.reload({ transaction, lock: transaction.LOCK.UPDATE });
+        await user.update({ name: name || user.name, updated_at: new Date(Math.max(user.updated_at.getTime(), event.timestamp)) }, { transaction });
+        await this.messages.findOrCreate({
+          where: { id: message.id },
+          defaults: { id: message.id, line_user_id: userId, direction: "in", body: message.type === "text" ? message.text || "" : `[${message.type}]`, created_at: at },
+          transaction,
+        });
+      });
     }
+  }
+  async handleFollow(userId: string, timestamp: number) {
+    let name: string | null = null,
+      pictureUrl: string | null = null;
+    try {
+      const profile = await (await line(`profile/${encodeURIComponent(userId)}`)).json();
+      name = profile.displayName || null;
+      pictureUrl = profile.pictureUrl || null;
+    } catch {
+      /* Store the follow even if the profile is unavailable. */
+    }
+    const at = new Date(timestamp);
+    await this.database.transaction(async (transaction) => {
+      const [user] = await this.users.findOrCreate({ where: { id: userId }, defaults: { id: userId, name: name || userId, friend_status: "unknown", updated_at: at }, transaction });
+      await user.reload({ transaction, lock: transaction.LOCK.UPDATE });
+      if (user.friend_status_at && user.friend_status_at.getTime() > timestamp) return;
+      await user.update(
+        {
+          name: name || user.name,
+          picture_url: pictureUrl || user.picture_url,
+          friend_status: "follow",
+          friend_status_at: at,
+          followed_at: at,
+          updated_at: new Date(Math.max(user.updated_at.getTime(), timestamp)),
+        },
+        { transaction },
+      );
+    });
   }
 }

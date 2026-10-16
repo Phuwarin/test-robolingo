@@ -1,8 +1,6 @@
-import { Controller, Get, Header, Inject, ServiceUnavailableException, UseGuards } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard.js";
+import { Controller, Get, Header, Inject, ServiceUnavailableException } from "@nestjs/common";
 import { ConversationsService } from "./conversations.service.js";
-@Controller("api/conversations")
-@UseGuards(AuthGuard)
+@Controller("conversations")
 export class ConversationsController {
   constructor(@Inject(ConversationsService) private readonly service: ConversationsService) {}
   @Get()

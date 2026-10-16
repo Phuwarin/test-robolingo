@@ -10,15 +10,22 @@
     "typecheck": "bun --bun tsc --noEmit",
     "test": "bun test",
     "format": "bun --bun prettier --write .",
-    "format:check": "bun --bun prettier --check ."
+    "format:check": "bun --bun prettier --check .",
+    "db:migrate": "bun scripts/migrate.ts",
+    "db:up": "docker compose -p test-robolingo up -d --wait",
+    "db:down": "docker compose -p test-robolingo down"
   },
   "dependencies": {
-    "@neondatabase/serverless": "latest",
     "@nestjs/common": "^11",
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
+    "@nestjs/sequelize": "^11",
+    "pg": "^8.23.1",
+    "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "sequelize": "^6",
+    "sequelize-typescript": "^2.1.6"
   },
   "devDependencies": {
     "@types/node": "latest",
