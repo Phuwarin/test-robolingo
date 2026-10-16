@@ -1,3 +1,5 @@
+import { WebhookService } from "../src/modules/webhook/webhook.service.js";
+import { ConversationsService } from "../src/modules/conversations/conversations.service.js";
 import { beforeAll, afterAll, test } from "bun:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
@@ -12,12 +14,22 @@ beforeAll(async () => {
 afterAll(async () => {
   await app?.close();
 });
-test("Nest modules serve health and guard conversations", async () => {
+test("Nest endpoints work without an auth module", async () => {
   const health = await fetch(`${base}/health`);
   assert.equal(health.status, 200);
-  assert.equal((await health.json()).service, "line-desk-api");
-  assert.equal((await fetch(`${base}/api/conversations`)).status, 401);
-  assert.equal((await fetch(`${base}/api/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).status, 401);
+  assert.equal((await fetch(`${base}/api/login`, { method: "POST" })).status, 404);
+  const service = app.get(ConversationsService);
+  const original = service.listConversations;
+  service.listConversations = async () => ({ contacts: [], messages: [] });
+  try {
+    const conversations = await fetch(`${base}/api/conversations`);
+    assert.equal(conversations.status, 200);
+    assert.deepEqual(await conversations.json(), { contacts: [], messages: [] });
+  } finally {
+    service.listConversations = original;
+  }
+  const invalid = await fetch(`${base}/api/messages`, { method: "POST", headers: { "Content-Type": "application/json", origin: process.env.WEB_ORIGIN || "http://localhost:3099" }, body: "{}" });
+  assert.equal(invalid.status, 400);
 });
 test("Nest raw body preserves LINE signature", async () => {
   const previous = process.env.LINE_CHANNEL_SECRET;
@@ -33,29 +45,26 @@ test("Nest raw body preserves LINE signature", async () => {
     else process.env.LINE_CHANNEL_SECRET = previous;
   }
 });
-test("Nest login issues a usable cookie and logout clears it", async () => {
-  const oldPassword = process.env.ADMIN_PASSWORD,
-    oldSecret = process.env.SESSION_SECRET;
-  process.env.ADMIN_PASSWORD = "test-password";
-  process.env.SESSION_SECRET = "test-session-secret";
+
+test("signed follow dispatches to follower storage without creating a message", async () => {
+  const service = app.get(WebhookService),
+    original = service.handleFollow;
+  const calls: Array<{ userId: string; timestamp: number }> = [];
+  service.handleFollow = async (userId, timestamp) => {
+    calls.push({ userId, timestamp });
+  };
+  const previous = process.env.LINE_CHANNEL_SECRET;
+  process.env.LINE_CHANNEL_SECRET = "follow-test-secret";
   try {
-    const login = await fetch(`${base}/api/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: "test-password" }) });
-    assert.equal(login.status, 200);
-    const cookie = login.headers.get("set-cookie")!;
-    assert.ok(cookie.includes("HttpOnly"));
-    const invalid = await fetch(`${base}/api/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", cookie: cookie.split(";")[0], origin: process.env.WEB_ORIGIN || "http://localhost:3099" },
-      body: "{}",
-    });
-    assert.equal(invalid.status, 400);
-    const logout = await fetch(`${base}/api/login`, { method: "DELETE" });
-    assert.equal(logout.status, 200);
-    assert.ok(logout.headers.get("set-cookie")?.includes("Expires="));
+    const timestamp = Date.now();
+    const body = JSON.stringify({ events: [{ type: "follow", webhookEventId: "follow-1", timestamp, source: { type: "user", userId: "U-test" }, follow: { isUnblocked: false } }] });
+    const signature = createHmac("sha256", "follow-test-secret").update(body).digest("base64");
+    const response = await fetch(`${base}/api/webhook`, { method: "POST", headers: { "Content-Type": "application/json", "x-line-signature": signature }, body });
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls, [{ userId: "U-test", timestamp }]);
   } finally {
-    if (oldPassword === undefined) delete process.env.ADMIN_PASSWORD;
-    else process.env.ADMIN_PASSWORD = oldPassword;
-    if (oldSecret === undefined) delete process.env.SESSION_SECRET;
-    else process.env.SESSION_SECRET = oldSecret;
+    service.handleFollow = original;
+    if (previous === undefined) delete process.env.LINE_CHANNEL_SECRET;
+    else process.env.LINE_CHANNEL_SECRET = previous;
   }
 });
