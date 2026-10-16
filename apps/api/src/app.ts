@@ -1,14 +1,11 @@
-import { Hono } from "hono";
-import { bodyLimit } from "hono/body-limit";
-import { routes as auth } from "./modules/auth/auth.routes.js";
-import { routes as conversations } from "./modules/conversations/conversations.routes.js";
-import { routes as messages } from "./modules/messages/messages.routes.js";
-import { routes as webhook } from "./modules/webhook/webhook.routes.js";
-export const app = new Hono();
-app.use("*", bodyLimit({ maxSize: 1024 * 1024, onError: (c) => c.json({ error: "Request too large" }, 413) }));
-app.get("/health", (c) => c.json({ ok: true, service: "line-desk-api" }));
-app.route("/api/login", auth);
-app.route("/api/conversations", conversations);
-app.route("/api/messages", messages);
-app.route("/api/webhook", webhook);
-app.onError(() => Response.json({ error: "Internal server error" }, { status: 500 }));
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
+import { AppModule } from "./app.module.js";
+import { HttpExceptionFilter } from "./common/http-exception.filter.js";
+export async function createApp() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true, logger: false });
+  app.useBodyParser("json", { limit: "1mb" });
+  app.useGlobalFilters(new HttpExceptionFilter());
+  return app;
+}

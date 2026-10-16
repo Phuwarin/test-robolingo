@@ -1,15 +1,18 @@
-import { equal, token } from "../../common/security.js";
-export async function POST(request: Request) {
-  const password = process.env.ADMIN_PASSWORD,
-    secret = process.env.SESSION_SECRET;
-  if (!password || !secret) return Response.json({ error: "กรุณาตั้งค่า ADMIN_PASSWORD และ SESSION_SECRET บนเซิร์ฟเวอร์" }, { status: 503 });
-  const data = await request.json().catch(() => ({}));
-  if (typeof data.password !== "string" || !equal(data.password, password)) return Response.json({ error: "รหัสผ่านไม่ถูกต้อง" }, { status: 401 });
-  return Response.json({ ok: true }, { headers: { "Set-Cookie": sessionCookie(token(secret), 28800) } });
-}
-export async function DELETE() {
-  return Response.json({ ok: true }, { headers: { "Set-Cookie": sessionCookie("", 0) } });
-}
-function sessionCookie(value: string, maxAge: number) {
-  return `session=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${process.env.NODE_ENV === "production" ? "; Secure" : ""}`;
+import { Body, Controller, Delete, HttpCode, Inject, Post, Res } from "@nestjs/common";
+import type { Response } from "express";
+import { AuthService } from "./auth.service.js";
+@Controller("api/login")
+export class AuthController {
+  constructor(@Inject(AuthService) private readonly auth: AuthService) {}
+  @Post()
+  @HttpCode(200)
+  login(@Body() data: { password?: unknown }, @Res({ passthrough: true }) response: Response) {
+    response.cookie("session", this.auth.login(data?.password), { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/", maxAge: 28800000 });
+    return { ok: true };
+  }
+  @Delete()
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie("session", { path: "/" });
+    return { ok: true };
+  }
 }

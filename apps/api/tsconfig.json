@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "Preserve",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "src",
     "lib": ["ES2022", "DOM"],
     "types": ["bun"],
-    "noEmit": true
+    "noEmit": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "dist"
   },
   "include": ["src/**/*.ts"]
 }

@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun --bun tsc --noEmit && bun build src/index.ts --target bun --outdir dist --packages external",
-    "start": "bun dist/index.js",
+    "dev": "bun --watch src/main.ts",
+    "build": "bun --bun tsc",
+    "start": "bun dist/main.js",
     "typecheck": "bun --bun tsc --noEmit",
     "test": "bun test",
     "format": "bun --bun prettier --write .",
@@ -14,13 +14,18 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "latest",
-    "hono": "latest"
+    "@nestjs/common": "^11",
+    "@nestjs/core": "^11",
+    "@nestjs/platform-express": "^11",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/node": "latest",
     "typescript": "latest",
     "prettier": "^3.8.3",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/express": "^5"
   },
   "packageManager": "bun@1.4.2"
 }

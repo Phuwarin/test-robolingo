@@ -5,7 +5,7 @@ LINE OA admin webchat. Repository: https://github.com/Phuwarin/test-robolingo
 ## Structure
 
 - `apps/web`: Next.js + TypeScript + shadcn/ui, port 3099.
-- `apps/api`: standalone Hono + Bun + TypeScript, port 4099.
+- `apps/api`: standalone NestJS + Bun + TypeScript, port 4099.
 
 Each app owns its package.json, bun.lock, node_modules, environment files and Prettier (printWidth 200). No workspaces or shared dependencies. There is no root package or scripts directory.
 
@@ -34,3 +34,5 @@ In each app run `bun run format`, `bun run format:check`, `bun run typecheck`, a
 ## Submission
 
 Provide the real LINE OA add-friend URL, production web URL and public GitHub repository URL after service configuration and deployment.
+
+API uses NestJS modules, controllers, injectable services and an auth guard. `bun run dev` runs src/main.ts with Bun watch, while `bun run build` compiles with TypeScript (including decorator metadata) and `bun run start` runs dist/main.js on Bun.

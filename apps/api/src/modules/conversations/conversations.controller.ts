@@ -1,11 +1,17 @@
-import { authorized } from "../auth/auth.service.js";
-import { listConversations } from "./conversations.service.js";
-export async function GET(request: Request) {
-  if (!authorized(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  try {
-    const { contacts, messages } = await listConversations();
-    return Response.json({ contacts, messages }, { headers: { "Cache-Control": "no-store" } });
-  } catch {
-    return Response.json({ error: "โหลดข้อมูลไม่ได้ ตรวจสอบฐานข้อมูลและ schema.sql" }, { status: 503 });
+import { Controller, Get, Header, Inject, ServiceUnavailableException, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard.js";
+import { ConversationsService } from "./conversations.service.js";
+@Controller("api/conversations")
+@UseGuards(AuthGuard)
+export class ConversationsController {
+  constructor(@Inject(ConversationsService) private readonly service: ConversationsService) {}
+  @Get()
+  @Header("Cache-Control", "no-store")
+  async list() {
+    try {
+      return await this.service.listConversations();
+    } catch {
+      throw new ServiceUnavailableException("โหลดข้อมูลไม่ได้ ตรวจสอบฐานข้อมูลและ schema.sql");
+    }
   }
 }

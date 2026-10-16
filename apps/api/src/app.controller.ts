@@ -1,0 +1,7 @@
+import { Controller, Get } from "@nestjs/common";
+@Controller("health")
+export class AppController {
+  @Get() health() {
+    return { ok: true, service: "line-desk-api" };
+  }
+}
