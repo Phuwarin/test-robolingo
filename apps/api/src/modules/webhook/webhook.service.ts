@@ -24,10 +24,6 @@ export class WebhookService {
         await this.handleUnfollow(userId, event.timestamp);
         continue;
       }
-      if (event.type === "unsend" && event.unsend) {
-        await this.handleUnsend(userId, event.unsend.messageId);
-        continue;
-      }
       if (event.type !== "message" || !event.message) continue;
       await this.handleMessage(userId, event.timestamp, event.message);
     }
@@ -42,19 +38,62 @@ export class WebhookService {
     }
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
-      const [user] = await this.users.findOrCreate({ where: { id: userId }, defaults: { id: userId, name: name || userId, updatedAt: at }, transaction });
-      await user.reload({ transaction, lock: transaction.LOCK.UPDATE });
-      await user.update({ name: name || user.name, updatedAt: new Date(Math.max(user.updatedAt.getTime(), timestamp)) }, { transaction });
-      await this.messages.findOrCreate({
-        where: { id: message.id },
-        defaults: { id: message.id, lineUserId: userId, direction: "received", body: message.type === "text" ? message.text || "" : `[${message.type}]`, createdAt: at },
+      const [user] = await this.users.findOrCreate({
+        where: {
+          id: userId,
+        },
+        defaults: {
+          id: userId,
+          name: name || userId,
+          updatedAt: at,
+        },
         transaction,
       });
+      await user.reload({
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
+      await user.update(
+        {
+          name: name || user.name,
+          updatedAt: new Date(Math.max(user.updatedAt.getTime(), timestamp)),
+        },
+        {
+          transaction,
+        },
+      );
+      await this.messages.findOrCreate({
+        where: {
+          id: message.id,
+        },
+        defaults: {
+          id: message.id,
+          lineUserId: userId,
+          direction: "received",
+          body: message.type === "text" ? message.text || "" : `[${message.type}]`,
+          createdAt: at,
+        },
+        transaction,
+      });
+      const latest = await this.messages.findOne({
+        where: {
+          lineUserId: userId,
+        },
+        order: [
+          ["createdAt", "DESC"],
+          ["id", "DESC"],
+        ],
+        transaction,
+      });
+      await user.update(
+        {
+          lastMessageId: latest?.id || null,
+        },
+        {
+          transaction,
+        },
+      );
     });
-  }
-
-  async handleUnsend(userId: string, messageId: string) {
-    await this.messages.destroy({ where: { id: messageId, lineUserId: userId } });
   }
 
   async handleFollow(userId: string, timestamp: number) {
@@ -69,8 +108,22 @@ export class WebhookService {
     }
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
-      const [user] = await this.users.findOrCreate({ where: { id: userId }, defaults: { id: userId, name: name || userId, friendStatus: "unknown", updatedAt: at }, transaction });
-      await user.reload({ transaction, lock: transaction.LOCK.UPDATE });
+      const [user] = await this.users.findOrCreate({
+        where: {
+          id: userId,
+        },
+        defaults: {
+          id: userId,
+          name: name || userId,
+          friendStatus: "unknown",
+          updatedAt: at,
+        },
+        transaction,
+      });
+      await user.reload({
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
       if (user.friendStatusAt && user.friendStatusAt.getTime() > timestamp) return;
       await user.update(
         {
@@ -80,7 +133,9 @@ export class WebhookService {
           friendStatusAt: at,
           updatedAt: new Date(Math.max(user.updatedAt.getTime(), timestamp)),
         },
-        { transaction },
+        {
+          transaction,
+        },
       );
     });
   }
@@ -89,13 +144,32 @@ export class WebhookService {
     const at = new Date(timestamp);
     await this.database.transaction(async (transaction) => {
       const [user] = await this.users.findOrCreate({
-        where: { id: userId },
-        defaults: { id: userId, name: userId, friendStatus: "unknown", updatedAt: at },
+        where: {
+          id: userId,
+        },
+        defaults: {
+          id: userId,
+          name: userId,
+          friendStatus: "unknown",
+          updatedAt: at,
+        },
         transaction,
       });
-      await user.reload({ transaction, lock: transaction.LOCK.UPDATE });
+      await user.reload({
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      });
       if (user.friendStatusAt && user.friendStatusAt.getTime() >= timestamp) return;
-      await user.update({ friendStatus: "unfollow", friendStatusAt: at, updatedAt: new Date(Math.max(user.updatedAt.getTime(), timestamp)) }, { transaction });
+      await user.update(
+        {
+          friendStatus: "unfollow",
+          friendStatusAt: at,
+          updatedAt: new Date(Math.max(user.updatedAt.getTime(), timestamp)),
+        },
+        {
+          transaction,
+        },
+      );
     });
   }
 }

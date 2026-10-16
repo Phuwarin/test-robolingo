@@ -1,3 +1,4 @@
+import { LineUsersService } from "../src/modules/line-users/line-users.service.js";
 import { WebhookService } from "../src/modules/webhook/webhook.service.js";
 import { ConversationsService } from "../src/modules/conversations/conversations.service.js";
 import { beforeAll, afterAll, test } from "bun:test";
@@ -89,5 +90,25 @@ test("signed unfollow dispatches user and event time", async () => {
     service.handleUnfollow = original;
     if (previous === undefined) delete process.env.LINE_CHANNEL_SECRET;
     else process.env.LINE_CHANNEL_SECRET = previous;
+  }
+});
+
+test("line users endpoint validates filters and pagination", async () => {
+  assert.equal((await fetch(`${base}/api/line-users?status=invalid`)).status, 400);
+  assert.equal((await fetch(`${base}/api/line-users?page=0`)).status, 400);
+  assert.equal((await fetch(`${base}/api/line-users?limit=101`)).status, 400);
+  const service = app.get(LineUsersService),
+    original = service.list;
+  const calls: unknown[][] = [];
+  service.list = async (...args) => {
+    calls.push(args);
+    return { users: [], total: 0, page: 2, limit: 10 };
+  };
+  try {
+    const response = await fetch(`${base}/api/line-users?q=hello&status=follow&page=2&limit=10`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls, [["hello", "follow", 2, 10]]);
+  } finally {
+    service.list = original;
   }
 });

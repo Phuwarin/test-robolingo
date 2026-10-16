@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-type Contact = { id: string; name: string; preview: string };
+type Contact = { id: string; name: string; preview: string; pictureUrl?: string | null };
 type Message = { id: string; contactId: string; direction: "received" | "botSent"; body: string; createdAt: string };
 const samples: Contact[] = [
   { id: "demo-1", name: "พิมพ์ชนก", preview: "สวัสดีค่ะ ขอสอบถามข้อมูลหน่อยค่ะ" },
@@ -13,10 +13,10 @@ const samples: Contact[] = [
 ];
 const sampleMessages: Message[] = samples.map((c, i) => ({ id: `sample-${i}`, contactId: c.id, direction: "received", body: c.preview, createdAt: "2026-10-16T03:00:00Z" }));
 export default function Home() {
-  const [mode, setMode] = useState<"live" | "demo">("demo"),
-    [contacts, setContacts] = useState<Contact[]>(samples),
-    [messages, setMessages] = useState<Message[]>(sampleMessages),
-    [selected, setSelected] = useState(samples[0].id),
+  const [mode, setMode] = useState<"live" | "demo">("live"),
+    [contacts, setContacts] = useState<Contact[]>([]),
+    [messages, setMessages] = useState<Message[]>([]),
+    [selected, setSelected] = useState(""),
     [query, setQuery] = useState(""),
     [draft, setDraft] = useState(""),
     [error, setError] = useState(""),
@@ -37,7 +37,10 @@ export default function Home() {
       setContacts(data.contacts);
       setMessages(data.messages);
       setMode("live");
-      setSelected((value) => value || data.contacts[0]?.id || "");
+      setSelected((value) => {
+        const wanted = new URLSearchParams(window.location.search).get("user") || value;
+        return data.contacts.some((c: Contact) => c.id === wanted) ? wanted : data.contacts[0]?.id || "";
+      });
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "เชื่อมต่อไม่ได้");
@@ -45,6 +48,9 @@ export default function Home() {
       setRefreshing(false);
     }
   }
+  useEffect(() => {
+    void refresh();
+  }, []);
   useEffect(() => {
     if (mode !== "live") return;
     const timer = setInterval(refresh, 4000);
@@ -107,10 +113,15 @@ export default function Home() {
             </h1>
             <p>{mode === "demo" ? "โหมดทดลอง · ข้อมูลตัวอย่าง ข้อความจะไม่ถูกส่งไปยัง LINE" : "ดูแลทุกการสนทนา พร้อมตอบกลับจากที่เดียว"}</p>
           </div>
-          <Button className="subtle" disabled={refreshing} onClick={() => (mode === "live" ? void refresh() : demo())}>
+          <Button className="subtle" disabled={refreshing} onClick={() => void refresh()}>
             {refreshing ? "กำลังอัปเดต…" : "↻ รีเฟรช"}
           </Button>
         </header>
+        {error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         <section className="inbox">
           <aside>
             <div className="list-title">
@@ -131,6 +142,7 @@ export default function Home() {
                     }}
                   >
                     <Avatar className="avatar">
+                      <AvatarImage src={c.pictureUrl || undefined} alt="" />
                       <AvatarFallback>{c.name.slice(0, 1)}</AvatarFallback>
                     </Avatar>
                     <span className="contact-copy">
@@ -157,6 +169,7 @@ export default function Home() {
               <>
                 <div className="chat-header">
                   <Avatar className="avatar">
+                    <AvatarImage src={contact.pictureUrl || undefined} alt="" />
                     <AvatarFallback>{contact.name.slice(0, 1)}</AvatarFallback>
                   </Avatar>
                   <div>

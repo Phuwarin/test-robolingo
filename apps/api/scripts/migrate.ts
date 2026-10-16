@@ -12,16 +12,29 @@ const database = new Sequelize({
 });
 try {
   await database.transaction(async (transaction) => {
-    await database.query("SELECT pg_advisory_xact_lock(2012053539)", { transaction });
+    await database.query("SELECT pg_advisory_xact_lock(2012053539)", {
+      transaction,
+    });
     const [tables] = await database.query<{ contacts: string | null; users: string | null }>("SELECT to_regclass('contacts') AS contacts,to_regclass('line_users') AS users", {
       type: QueryTypes.SELECT,
       transaction,
     });
     const path = tables.contacts || tables.users ? "../migrations/002_sequelize_models.sql" : "../schema.sql";
-    await database.query(await Bun.file(new URL(path, import.meta.url)).text(), { transaction });
-    await database.query(await Bun.file(new URL("../migrations/003_timestamps.sql", import.meta.url)).text(), { transaction });
-    await database.query(await Bun.file(new URL("../migrations/004_remove_followed_at.sql", import.meta.url)).text(), { transaction });
-    await database.query(await Bun.file(new URL("../migrations/005_message_direction.sql", import.meta.url)).text(), { transaction });
+    await database.query(await Bun.file(new URL(path, import.meta.url)).text(), {
+      transaction,
+    });
+    await database.query(await Bun.file(new URL("../migrations/003_timestamps.sql", import.meta.url)).text(), {
+      transaction,
+    });
+    await database.query(await Bun.file(new URL("../migrations/004_remove_followed_at.sql", import.meta.url)).text(), {
+      transaction,
+    });
+    await database.query(await Bun.file(new URL("../migrations/005_message_direction.sql", import.meta.url)).text(), {
+      transaction,
+    });
+    await database.query(await Bun.file(new URL("../migrations/006_last_message_id.sql", import.meta.url)).text(), {
+      transaction,
+    });
   });
   console.log("Database migration completed");
 } finally {

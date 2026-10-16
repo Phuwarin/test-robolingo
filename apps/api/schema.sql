@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS line_users (
  id text PRIMARY KEY,
  name text NOT NULL,
+ last_message_id text,
  picture_url text,
  friend_status text NOT NULL DEFAULT 'unknown',
  friend_status_at timestamptz,

@@ -21,6 +21,8 @@ export class WebhookController {
     } catch {
       throw new InternalServerErrorException("Webhook processing failed");
     }
-    return { ok: true };
+    return {
+      ok: true,
+    };
   }
 }
