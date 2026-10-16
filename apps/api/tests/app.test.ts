@@ -68,3 +68,26 @@ test("signed follow dispatches to follower storage without creating a message", 
     else process.env.LINE_CHANNEL_SECRET = previous;
   }
 });
+
+test("signed unfollow dispatches user and event time", async () => {
+  const service = app.get(WebhookService),
+    original = service.handleUnfollow;
+  const calls: Array<{ userId: string; timestamp: number }> = [];
+  service.handleUnfollow = async (userId, timestamp) => {
+    calls.push({ userId, timestamp });
+  };
+  const previous = process.env.LINE_CHANNEL_SECRET;
+  process.env.LINE_CHANNEL_SECRET = "unfollow-test-secret";
+  try {
+    const timestamp = Date.now();
+    const body = JSON.stringify({ events: [{ type: "unfollow", webhookEventId: "unfollow-1", timestamp, source: { type: "user", userId: "U-unfollow" } }] });
+    const signature = createHmac("sha256", "unfollow-test-secret").update(body).digest("base64");
+    const response = await fetch(`${base}/api/webhook`, { method: "POST", headers: { "Content-Type": "application/json", "x-line-signature": signature }, body });
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls, [{ userId: "U-unfollow", timestamp }]);
+  } finally {
+    service.handleUnfollow = original;
+    if (previous === undefined) delete process.env.LINE_CHANNEL_SECRET;
+    else process.env.LINE_CHANNEL_SECRET = previous;
+  }
+});

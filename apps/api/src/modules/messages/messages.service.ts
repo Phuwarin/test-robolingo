@@ -15,8 +15,8 @@ export class MessagesService {
     if (await this.messages.findByPk(data.id)) return true;
     await line("message/push", { method: "POST", headers: { "X-Line-Retry-Key": data.id }, body: JSON.stringify({ to: data.to, messages: [{ type: "text", text: data.text.trim() }] }) });
     await this.database.transaction(async (transaction) => {
-      await this.messages.findOrCreate({ where: { id: data.id }, defaults: { id: data.id, line_user_id: data.to, direction: "out", body: data.text.trim() }, transaction });
-      await this.users.update({ updated_at: new Date() }, { where: { id: data.to }, transaction });
+      await this.messages.findOrCreate({ where: { id: data.id }, defaults: { id: data.id, lineUserId: data.to, direction: "botSent", body: data.text.trim() }, transaction });
+      await this.users.update({ updatedAt: new Date() }, { where: { id: data.to }, transaction });
     });
     return true;
   }

@@ -20,6 +20,8 @@ try {
     const path = tables.contacts || tables.users ? "../migrations/002_sequelize_models.sql" : "../schema.sql";
     await database.query(await Bun.file(new URL(path, import.meta.url)).text(), { transaction });
     await database.query(await Bun.file(new URL("../migrations/003_timestamps.sql", import.meta.url)).text(), { transaction });
+    await database.query(await Bun.file(new URL("../migrations/004_remove_followed_at.sql", import.meta.url)).text(), { transaction });
+    await database.query(await Bun.file(new URL("../migrations/005_message_direction.sql", import.meta.url)).text(), { transaction });
   });
   console.log("Database migration completed");
 } finally {

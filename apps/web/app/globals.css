@@ -306,10 +306,10 @@ article {
   padding: 12px 16px;
   font-size: 13px;
 }
-.message.out {
+.message.botSent {
   margin-left: auto;
 }
-.message.out > div {
+.message.botSent > div {
   background: var(--green);
   color: white;
   border-color: var(--green);
@@ -321,7 +321,7 @@ time {
   font-size: 9px;
   margin-top: 6px;
 }
-.out time {
+.botSent time {
   text-align: right;
 }
 .composer {

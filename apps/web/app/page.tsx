@@ -6,12 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 type Contact = { id: string; name: string; preview: string };
-type Message = { id: string; contact_id: string; direction: "in" | "out"; body: string; created_at: string };
+type Message = { id: string; contactId: string; direction: "received" | "botSent"; body: string; createdAt: string };
 const samples: Contact[] = [
   { id: "demo-1", name: "พิมพ์ชนก", preview: "สวัสดีค่ะ ขอสอบถามข้อมูลหน่อยค่ะ" },
   { id: "demo-2", name: "ธนกร", preview: "ขอบคุณครับ" },
 ];
-const sampleMessages: Message[] = samples.map((c, i) => ({ id: `sample-${i}`, contact_id: c.id, direction: "in", body: c.preview, created_at: "2026-10-16T03:00:00Z" }));
+const sampleMessages: Message[] = samples.map((c, i) => ({ id: `sample-${i}`, contactId: c.id, direction: "received", body: c.preview, createdAt: "2026-10-16T03:00:00Z" }));
 export default function Home() {
   const [mode, setMode] = useState<"live" | "demo">("demo"),
     [contacts, setContacts] = useState<Contact[]>(samples),
@@ -69,7 +69,7 @@ export default function Home() {
     pending.current = value;
     try {
       if (mode === "demo") {
-        const message: Message = { id: value.id, contact_id: selected, direction: "out", body: value.text, created_at: new Date().toISOString() };
+        const message: Message = { id: value.id, contactId: selected, direction: "botSent", body: value.text, createdAt: new Date().toISOString() };
         setMessages((v) => [...v, message]);
         setContacts((v) => v.map((c) => (c.id === selected ? { ...c, preview: value.text } : c)));
       } else {
@@ -168,13 +168,13 @@ export default function Home() {
                 <div className="thread">
                   <div className="thread-note">จุดเริ่มต้นของบทสนทนากับ {contact.name}</div>
                   {messages
-                    .filter((m) => m.contact_id === selected)
+                    .filter((m) => m.contactId === selected)
                     .map((m) => (
                       <div key={m.id} className={`message ${m.direction}`}>
                         <div>{m.body}</div>
                         <time>
-                          {m.direction === "out" ? "คุณ · " : ""}
-                          {new Date(m.created_at).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          {m.direction === "botSent" ? "คุณ · " : ""}
+                          {new Date(m.createdAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                         </time>
                       </div>
                     ))}
