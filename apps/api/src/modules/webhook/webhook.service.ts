@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { RealtimeGateway } from "../realtime/realtime.gateway.js";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { LineUser, Message } from "../../database/models/index.js";
@@ -10,6 +11,7 @@ export class WebhookService {
     @InjectModel(LineUser) private readonly users: typeof LineUser,
     @InjectModel(Message) private readonly messages: typeof Message,
     @InjectConnection() private readonly database: Sequelize,
+    @Inject(RealtimeGateway) private readonly realtime: RealtimeGateway,
   ) {}
   async processEvents(events: LineEvent[]) {
     console.log(events);
@@ -78,6 +80,7 @@ export class WebhookService {
         },
       );
     });
+    this.realtime.notify(userId, "message");
   }
 
   async handleFollow(userId: string, timestamp: number) {
@@ -115,6 +118,7 @@ export class WebhookService {
         },
       );
     });
+    this.realtime.notify(userId, "user");
   }
 
   async handleUnfollow(userId: string, timestamp: number) {
@@ -141,5 +145,6 @@ export class WebhookService {
         },
       );
     });
+    this.realtime.notify(userId, "user");
   }
 }

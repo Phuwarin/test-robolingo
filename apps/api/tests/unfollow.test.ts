@@ -1,3 +1,4 @@
+import { RealtimeGateway } from "../src/modules/realtime/realtime.gateway.js";
 import { test } from "bun:test";
 import assert from "node:assert/strict";
 import { Sequelize } from "sequelize-typescript";
@@ -37,7 +38,12 @@ function setup(existing = true) {
       return callback({ LOCK: { UPDATE: "UPDATE" } });
     },
   };
-  return { record, service: new WebhookService(users as unknown as typeof LineUser, {} as typeof Message, database as unknown as Sequelize), updates: () => updates, created: () => created };
+  return {
+    record,
+    service: new WebhookService(users as unknown as typeof LineUser, {} as typeof Message, database as unknown as Sequelize, { notify() {} } as RealtimeGateway),
+    updates: () => updates,
+    created: () => created,
+  };
 }
 test("unfollow keeps profile, ignores duplicate and older events", async () => {
   const { service, record, updates } = setup();

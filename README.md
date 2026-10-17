@@ -48,3 +48,7 @@ The API uses @nestjs/sequelize, sequelize-typescript and the pg PostgreSQL drive
 ## Local PostgreSQL
 
 From apps/api run `bun run db:up` to start PostgreSQL 18 on 127.0.0.1:5433, database/user line_desk, then `bun run db:migrate`. Password and DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD are stored in the ignored API .env. The compose project is test-robolingo with a dedicated postgres_data volume. `bun run db:down` stops the container and keeps its data. SequelizeModule.forRootAsync is configured in AppModule; feature modules register their models with forFeature.
+
+## Realtime
+
+Socket.IO runs on the API port at /socket.io/ using WebSocket transport. Set NEXT_PUBLIC_SOCKET_URL in the web environment to the API origin (http://localhost:4099 locally, https://test-api.9phuwarin.dev through the current tunnel). WEB_ORIGIN on the API controls the allowed browser origin. After a successful database transaction, the API emits workspace.updated with lineUserId and reason (message or user). Chat and Users reload their data on this notification and after socket connect/reconnect; the four-second polling timer has been removed. The UI indicates connection loss and retains manual refresh. The API must run on hosting that supports persistent WebSocket connections; this is separate from hosting the Next.js web app on Vercel.

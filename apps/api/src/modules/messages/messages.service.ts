@@ -1,5 +1,6 @@
+import { RealtimeGateway } from "../realtime/realtime.gateway.js";
 import { randomUUID } from "node:crypto";
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { LineUser, Message } from "../../database/models/index.js";
@@ -10,6 +11,7 @@ export class MessagesService {
     @InjectModel(LineUser) private readonly users: typeof LineUser,
     @InjectModel(Message) private readonly messages: typeof Message,
     @InjectConnection() private readonly database: Sequelize,
+    @Inject(RealtimeGateway) private readonly realtime: RealtimeGateway,
   ) {}
   async sendMessage(data: { to: string; text: string }) {
     const recipient = await this.users.findOne({
@@ -53,6 +55,7 @@ export class MessagesService {
         },
       );
     });
+    this.realtime.notify(data.to, "message");
     return true;
   }
 }

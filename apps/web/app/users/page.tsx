@@ -1,4 +1,5 @@
 "use client";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export default function UsersPage() {
     [busy, setBusy] = useState(true),
     [error, setError] = useState(""),
     [version, setVersion] = useState(0);
+  useRealtime(() => setVersion((value) => value + 1));
   useEffect(() => {
     const controller = new AbortController();
     setBusy(true);

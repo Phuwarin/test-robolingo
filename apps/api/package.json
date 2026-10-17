@@ -19,20 +19,24 @@
     "@nestjs/common": "^11",
     "@nestjs/core": "^11",
     "@nestjs/platform-express": "^11",
+    "@nestjs/platform-socket.io": "^11",
     "@nestjs/sequelize": "^11",
+    "@nestjs/websockets": "^11",
     "pg": "^8.23.1",
     "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "sequelize": "^6",
-    "sequelize-typescript": "^2.1.6"
+    "sequelize-typescript": "^2.1.6",
+    "socket.io": "^4.8.4"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "typescript": "latest",
-    "prettier": "^3.8.3",
     "@types/bun": "latest",
-    "@types/express": "^5"
+    "@types/express": "^5",
+    "@types/node": "latest",
+    "prettier": "^3.8.3",
+    "socket.io-client": "^4.8.4",
+    "typescript": "latest"
   },
   "packageManager": "bun@1.4.2"
 }

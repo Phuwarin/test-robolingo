@@ -1,4 +1,5 @@
 "use client";
+import { useRealtime } from "@/hooks/use-realtime";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,11 +53,7 @@ export default function Home() {
   useEffect(() => {
     void refresh();
   }, []);
-  useEffect(() => {
-    if (mode !== "live") return;
-    const timer = setInterval(refresh, 4000);
-    return () => clearInterval(timer);
-  }, [mode]);
+  const connected = useRealtime(() => void refresh(), mode === "live");
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selected]);
@@ -164,7 +161,7 @@ export default function Home() {
             )}
           </div>
           <div className="aside-footer">
-            <span>{mode === "demo" ? "โหมดทดลอง ไม่ส่งข้อความจริง" : "อัปเดตอัตโนมัติ"}</span>
+            <span>{mode === "demo" ? "โหมดทดลอง ไม่ส่งข้อความจริง" : connected ? "เชื่อมต่อเรียลไทม์" : "ขาดการเชื่อมต่อ · กดรีเฟรช"}</span>
             <Button variant="ghost" size="sm" onClick={mode === "demo" ? () => void refresh() : demo}>
               {mode === "demo" ? "ใช้ข้อมูลจริง" : "ดูตัวอย่าง"}
             </Button>
