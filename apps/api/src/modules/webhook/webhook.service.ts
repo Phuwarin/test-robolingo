@@ -58,7 +58,7 @@ export class WebhookService {
       );
       await this.messages.findOrCreate({
         where: { id: message.id },
-        defaults: { id: message.id, lineUserId: userId, direction: "received", body: message.type === "text" ? message.text || "" : `[${message.type}]`, createdAt: at },
+        defaults: { id: message.id, lineMessageId: message.id, lineUserId: userId, direction: "received", body: message.type === "text" ? message.text || "" : `[${message.type}]`, createdAt: at },
         transaction,
       });
       const latest = await this.messages.findOne({

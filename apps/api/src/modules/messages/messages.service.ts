@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
@@ -10,25 +11,30 @@ export class MessagesService {
     @InjectModel(Message) private readonly messages: typeof Message,
     @InjectConnection() private readonly database: Sequelize,
   ) {}
-  async sendMessage(data: { to: string; text: string; id: string }) {
-    if (!(await this.users.findByPk(data.to))) return false;
-    if (await this.messages.findByPk(data.id)) return true;
-    await line("message/push", {
+  async sendMessage(data: { to: string; text: string }) {
+    const recipient = await this.users.findOne({
+      where: { id: data.to },
+    });
+    if (!recipient) {
+      return false;
+    }
+
+    const response = await line("message/push", {
       method: "POST",
-      headers: { "X-Line-Retry-Key": data.id },
       body: JSON.stringify({ to: data.to, messages: [{ type: "text", text: data.text.trim() }] }),
     });
+    const result = (await response.json()) as { sentMessages?: Array<{ id: string }> };
+    const messageId = randomUUID();
+    const lineMessageId = result.sentMessages?.[0]?.id || null;
+
     await this.database.transaction(async (transaction) => {
-      const user = await this.users.findByPk(data.to, {
+      const user = await this.users.findOne({
+        where: { id: data.to },
         transaction,
         lock: transaction.LOCK.UPDATE,
       });
       if (!user) throw new Error("User no longer exists");
-      await this.messages.findOrCreate({
-        where: { id: data.id },
-        defaults: { id: data.id, lineUserId: data.to, direction: "botSent", body: data.text.trim() },
-        transaction,
-      });
+      await this.messages.create({ id: messageId, lineMessageId, lineUserId: data.to, direction: "botSent", body: data.text.trim() }, { transaction });
       const latest = await this.messages.findOne({
         where: { lineUserId: data.to },
         order: [

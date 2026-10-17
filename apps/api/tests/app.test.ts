@@ -1,3 +1,4 @@
+import { MessagesService } from "../src/modules/messages/messages.service.js";
 import { LineUsersService } from "../src/modules/line-users/line-users.service.js";
 import { WebhookService } from "../src/modules/webhook/webhook.service.js";
 import { ConversationsService } from "../src/modules/conversations/conversations.service.js";
@@ -108,5 +109,26 @@ test("line users endpoint validates filters and pagination", async () => {
     assert.deepEqual(calls, [["hello", "follow", 2, 10]]);
   } finally {
     service.list = original;
+  }
+});
+
+test("send endpoint accepts only recipient and text without a client ID", async () => {
+  const service = app.get(MessagesService),
+    original = service.sendMessage;
+  const calls: unknown[] = [];
+  service.sendMessage = async (data) => {
+    calls.push(data);
+    return true;
+  };
+  try {
+    const response = await fetch(`${base}/api/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", origin: process.env.WEB_ORIGIN || "http://localhost:3099" },
+      body: JSON.stringify({ to: "U-test", text: "hello" }),
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(calls, [{ to: "U-test", text: "hello" }]);
+  } finally {
+    service.sendMessage = original;
   }
 });

@@ -12,6 +12,9 @@ export class Message extends Model {
   @Column(DataType.TEXT)
   declare id: string;
 
+  @Column(DataType.TEXT)
+  declare lineMessageId: string | null;
+
   @ForeignKey(() => LineUser)
   @Column({ type: DataType.TEXT, allowNull: false })
   declare lineUserId: string;
