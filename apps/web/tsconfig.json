@@ -20,7 +20,8 @@
     },
     "allowJs": true,
     "skipLibCheck": true,
-    "incremental": true
+    "incremental": true,
+    "types": ["bun", "node", "react", "react-dom"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules"]
