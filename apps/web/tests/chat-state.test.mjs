@@ -24,7 +24,7 @@ test("conversation event updates only its row, ignores stale updates and moves l
     { id: "a", name: "A", updatedAt: "2026-10-17T00:00:00Z" },
     { id: "b", name: "B" },
   ];
-  const changed = mergeConversation(current, { id: "b", name: "B", lastMessageId: "m2", lastMessage: { body: "new", createdAt: "2026-10-17T01:00:00Z" }, updatedAt: "2026-10-17T01:00:00Z" });
+  const changed = mergeConversation(current, { id: "b", name: "B", lastMessageId: "m2", lastMessage: { body: "new" }, lastMessageTime: "2026-10-17T01:00:00Z", updatedAt: "2026-10-17T01:00:00Z" });
   assert.equal(changed[0].id, "b");
   assert.equal(changed[0].lastMessageId, "m2");
   assert.equal(changed[1], current[0]);
@@ -56,15 +56,15 @@ test("server read state merges after reconnect without making a read message unr
 
 test("latest incoming or outgoing message moves its chat first, but read and follow updates do not", () => {
   let conversations = [
-    { id: "a", name: "A", lastMessage: { body: "incoming", createdAt: "2026-10-18T10:00:00Z" } },
-    { id: "b", name: "B", lastMessage: { body: "older", createdAt: "2026-10-18T09:00:00Z" } },
+    { id: "a", name: "A", lastMessage: { body: "incoming" }, lastMessageTime: "2026-10-18T10:00:00Z" },
+    { id: "b", name: "B", lastMessage: { body: "older" }, lastMessageTime: "2026-10-18T09:00:00Z" },
   ];
-  conversations = mergeConversation(conversations, { id: "b", name: "B", lastMessage: { body: "outgoing", createdAt: "2026-10-18T11:00:00Z" } });
+  conversations = mergeConversation(conversations, { id: "b", name: "B", lastMessage: { body: "outgoing" }, lastMessageTime: "2026-10-18T11:00:00Z" });
   assert.deepEqual(
     conversations.map((conversation) => conversation.id),
     ["b", "a"],
   );
-  conversations = mergeConversation(conversations, { id: "a", name: "A", lastMessage: { body: "new incoming", createdAt: "2026-10-18T12:00:00Z" } });
+  conversations = mergeConversation(conversations, { id: "a", name: "A", lastMessage: { body: "new incoming" }, lastMessageTime: "2026-10-18T12:00:00Z" });
   assert.deepEqual(
     conversations.map((conversation) => conversation.id),
     ["a", "b"],
@@ -74,5 +74,15 @@ test("latest incoming or outgoing message moves its chat first, but read and fol
   assert.deepEqual(
     conversations.map((conversation) => conversation.id),
     ["a", "b", "new"],
+  );
+});
+
+test("new empty conversations sort by user creation time, not metadata update time", () => {
+  let conversations = [{ id: "chat", name: "Chat", lastMessage: { body: "hello" }, lastMessageTime: "2026-10-18T10:00:00Z", createdAt: "2026-10-18T08:00:00Z" }];
+  conversations = mergeConversation(conversations, { id: "new", name: "New", lastMessage: null, createdAt: "2026-10-18T11:00:00Z" });
+  conversations = mergeConversation(conversations, { id: "old", name: "Old", lastMessage: null, createdAt: "2026-10-18T09:00:00Z", updatedAt: "2026-10-18T12:00:00Z" });
+  assert.deepEqual(
+    conversations.map((conversation) => conversation.id),
+    ["new", "chat", "old"],
   );
 });

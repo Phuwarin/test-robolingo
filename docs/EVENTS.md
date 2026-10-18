@@ -43,8 +43,10 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
     pictureUrl,
     friendStatus,
     lastMessageId,
+    lastMessageTime,
     unreadCount, // ยอดของ User คนนี้ ไม่ใช่ยอดรวมทุกคน
-    lastMessage: { body, createdAt }, // null ถ้ายังไม่มีข้อความ
+    lastMessage: { body }, // null ถ้ายังไม่มีข้อความ
+    createdAt,
     updatedAt,
   },
   readReceipt: { messageIds, readAt }, // มีเฉพาะตอนอัปเดตการอ่าน
@@ -99,7 +101,7 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 | อ่านบนเว็บ       | ห้องที่เลือกอยู่บนแท็บที่มองเห็นและมีโฟกัส → `POST /api/conversations/:lineUserId/read` พร้อม Message UUID ที่แสดง → บันทึก `readAt` และคำนวณ unread ที่เหลือ → commit → `message.update` พร้อม `readReceipt` หากมีข้อความถูกเปลี่ยนเป็นอ่านแล้ว |
 
 - ข้อความส่งออกไม่เพิ่ม unread และส่งไม่ได้ถ้า User มีสถานะ `unfollow`
-- เรียงแชทจากเวลาข้อความล่าสุดทั้งขาเข้าและขาออก ใหม่สุดอยู่บนสุด User ที่ยังไม่มีข้อความอยู่ด้านล่าง การอ่านหรือเปลี่ยนสถานะเพื่อนไม่ทำให้แชทขึ้นบน
+- เรียงแชทจากเวลาข้อความล่าสุดทั้งขาเข้าและขาออก ใหม่สุดอยู่บนสุด ถ้ายังไม่มีข้อความจะใช้เวลาสร้าง User (`createdAt`) แทน จึงแสดงผู้ใช้ที่เพิ่งเพิ่มเข้ามาตามเวลานั้น การอ่านหรือเปลี่ยนสถานะเพื่อนไม่ทำให้แชทขึ้นบน
 - unread เป็นสถานะร่วมของเว็บทุกผู้ดูแล ไม่ใช่สถานะอ่านบนแอป LINE
 - Socket ส่งหลัง transaction สำเร็จ หาก transaction ล้มเหลวจะไม่ส่ง event จากขั้นตอนนั้น
 

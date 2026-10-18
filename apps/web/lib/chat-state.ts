@@ -1,11 +1,13 @@
 export type Conversation = {
   id: string;
   name: string;
-  lastMessage?: { body: string; createdAt: string } | null;
+  lastMessage?: { body: string } | null;
   friendStatus?: "follow" | "unfollow" | "unknown";
   unreadCount?: number;
   pictureUrl?: string | null;
   lastMessageId?: string | null;
+  lastMessageTime?: string | null;
+  createdAt?: string;
   updatedAt?: string;
 };
 export type ChatMessage = { id: string; lineUserId: string; direction: "received" | "botSent"; body: string; readAt?: string | null; createdAt: string };
@@ -21,7 +23,7 @@ export function mergeConversation(current: Conversation[], incoming: Conversatio
   const existing = current.find((conversation) => conversation.id === incoming.id);
   if (existing?.updatedAt && incoming.updatedAt && Date.parse(existing.updatedAt) > Date.parse(incoming.updatedAt)) return current;
   const result = existing ? current.map((conversation) => (conversation.id === incoming.id ? { ...conversation, ...incoming } : conversation)) : [...current, incoming];
-  return result.sort((a, b) => Date.parse(b.lastMessage?.createdAt || "1970-01-01") - Date.parse(a.lastMessage?.createdAt || "1970-01-01"));
+  return result.sort((a, b) => Date.parse(b.lastMessageTime || b.createdAt || "1970-01-01") - Date.parse(a.lastMessageTime || a.createdAt || "1970-01-01") || a.id.localeCompare(b.id));
 }
 export function mergeMessage(current: ChatMessage[], incoming: ChatMessage) {
   const existing = current.find((message) => message.id === incoming.id);

@@ -35,6 +35,7 @@ export class MessagesService {
       throw new ForbiddenException("ผู้ใช้บล็อก OA ไม่สามารถส่งข้อความได้");
     }
 
+    const sentAt = new Date();
     const response = await line("message/push", {
       method: "POST",
       body: JSON.stringify({ to: recipient.lineUserId, messages: [{ type: "text", text: data.text.trim() }] }),
@@ -50,7 +51,7 @@ export class MessagesService {
         lock: transaction.LOCK.UPDATE,
       });
       if (!user) throw new Error("User no longer exists");
-      const message = await this.messages.create({ id: messageId, lineMessageId, lineUserId: data.to, direction: "botSent", body: data.text.trim() }, { transaction });
+      const message = await this.messages.create({ id: messageId, lineMessageId, lineUserId: data.to, direction: "botSent", body: data.text.trim(), createdAt: sentAt }, { transaction });
       const latest = await this.messages.findOne({
         where: { lineUserId: data.to },
         order: [
@@ -62,6 +63,7 @@ export class MessagesService {
       await user.update(
         {
           lastMessageId: latest?.id || null,
+          lastMessageTime: latest?.createdAt || null,
           updatedAt: new Date(),
         },
         {

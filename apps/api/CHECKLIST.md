@@ -10,10 +10,10 @@
 
 - [ ] `webhook.module.ts` — `WebhookModule`
 - Controller: `webhook.controller.ts` — `WebhookController`
-  - [x] `receive()` — POST /api/webhook
-    - [x] follow
-    - [x] unfollow
-    - [x] message
+  - [ ] `receive()` — POST /api/webhook
+    - [ ] follow
+    - [ ] unfollow
+    - [ ] message
 - Service: `webhook.service.ts` — `WebhookService`
   - [ ] `processEvents()`
   - [ ] `handleFollow()`
@@ -34,21 +34,21 @@
 
 - [ ] `conversations.module.ts` — `ConversationsModule`
 - Controller: `conversations.controller.ts` — `ConversationsController`
-  - [x] `list()` — GET /api/conversations
+  - [ ] `list()` — GET /api/conversations
   - [ ] `unreadCount()` — GET /api/conversations/unread-count
   - [ ] `markRead()` — POST /api/conversations/:lineUserId/read
 - Service: `conversations.service.ts` — `ConversationsService`
-  - [x] `listConversations()`
+  - [ ] `listConversations()`
   - [ ] `getUnreadCount()`
   - [ ] `markRead()`
 
 ## Line Users
 
-- [x] `line-users.module.ts` — `LineUsersModule`
+- [ ] `line-users.module.ts` — `LineUsersModule`
 - Controller: `line-users.controller.ts` — `LineUsersController`
-  - [x] `list()` — GET /api/line-users
+  - [ ] `list()` — GET /api/line-users
 - Service: `line-users.service.ts` — `LineUsersService`
-  - [x] `list()`
+  - [ ] `list()`
 
 ## Realtime
 

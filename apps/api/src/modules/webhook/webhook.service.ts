@@ -75,6 +75,7 @@ export class WebhookService {
       await user.update(
         {
           lastMessageId: latest?.id || null,
+          lastMessageTime: latest?.createdAt || null,
           unreadCount: user.unreadCount + (created ? 1 : 0),
         },
         {

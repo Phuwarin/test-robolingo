@@ -10,8 +10,8 @@ import { Search, RefreshCw, Send, MessageCircle, UsersRound } from "lucide-react
 import Link from "next/link";
 import { mergeConversation, mergeMessage, type Conversation, type ChatMessage as Message } from "@/lib/chat-state";
 const samples: Conversation[] = [
-  { id: "demo-1", name: "พิมพ์ชนก", lastMessage: { body: "สวัสดีค่ะ ขอสอบถามข้อมูลหน่อยค่ะ", createdAt: "2026-10-16T03:00:00Z" } },
-  { id: "demo-2", name: "ธนกร", lastMessage: { body: "ขอบคุณครับ", createdAt: "2026-10-16T03:00:00Z" } },
+  { id: "demo-1", name: "พิมพ์ชนก", lastMessage: { body: "สวัสดีค่ะ ขอสอบถามข้อมูลหน่อยค่ะ" }, lastMessageTime: "2026-10-16T03:00:00Z" },
+  { id: "demo-2", name: "ธนกร", lastMessage: { body: "ขอบคุณครับ" }, lastMessageTime: "2026-10-16T03:00:00Z" },
 ];
 const sampleMessages: Message[] = samples.map((c, i) => ({ id: `sample-${i}`, lineUserId: c.id, direction: "received", body: c.lastMessage?.body || "", createdAt: "2026-10-16T03:00:00Z" }));
 export default function Home() {
@@ -159,7 +159,7 @@ export default function Home() {
       if (mode === "demo") {
         const message: Message = { id: crypto.randomUUID(), lineUserId: selected, direction: "botSent", body: value.text, createdAt: new Date().toISOString() };
         setMessages((v) => [...v, message]);
-        setConversations((v) => v.map((c) => (c.id === selected ? { ...c, lastMessage: { body: value.text, createdAt: message.createdAt } } : c)));
+        setConversations((v) => v.map((c) => (c.id === selected ? { ...c, lastMessage: { body: value.text }, lastMessageTime: message.createdAt } : c)));
       } else {
         const response = await fetch("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(value) });
         const data = await response.json();
@@ -212,7 +212,7 @@ export default function Home() {
           </div>
           <div className="contacts">
             {filtered.map((c) => {
-              const lastMessageAt = c.lastMessage?.createdAt;
+              const lastMessageAt = c.lastMessageTime;
               return (
                 <Button
                   key={c.id}

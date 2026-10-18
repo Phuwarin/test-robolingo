@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, literal } from "sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { RealtimeGateway } from "../realtime/realtime.gateway.js";
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
@@ -14,9 +14,9 @@ export class ConversationsService {
   ) {}
   async listConversations() {
     const conversations = await this.users.findAll({
-      include: [{ model: Message, as: "lastMessage", attributes: ["body", "createdAt"], required: false }],
+      include: [{ model: Message, as: "lastMessage", attributes: ["body"], required: false }],
       order: [
-        [{ model: Message, as: "lastMessage" }, "createdAt", "DESC NULLS LAST"],
+        [literal('COALESCE("LineUser"."last_message_time", "LineUser"."created_at")'), "DESC"],
         ["id", "ASC"],
       ],
     });

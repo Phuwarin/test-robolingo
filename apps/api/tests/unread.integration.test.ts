@@ -35,6 +35,7 @@ test.skipIf(process.env.RUN_DB_TESTS !== "1")("unread persists, deduplicates and
     const secondStored = (await Message.findOne({ where: { lineMessageId: second.id } }))!;
     assert.notEqual(firstStored.id, first.id);
     assert.equal(firstStored.lineUserId, user.id);
+    assert.equal(user.lastMessageTime?.getTime(), secondStored.createdAt.getTime());
 
     await webhook.handleFollow(userId, Date.now());
     await webhook.handleUnfollow(userId, Date.now() + 1);
@@ -44,6 +45,9 @@ test.skipIf(process.env.RUN_DB_TESTS !== "1")("unread persists, deduplicates and
 
     await app.get(MessagesService).sendMessage({ to: user.id, text: "outgoing does not count" });
     assert.equal(pushedTo, userId);
+    const afterSend = (await LineUser.findOne({ where: { id: user.id } }))!;
+    const latestSent = (await Message.findOne({ where: { id: afterSend.lastMessageId } }))!;
+    assert.equal(afterSend.lastMessageTime?.getTime(), latestSent.createdAt.getTime());
     assert.equal((await LineUser.findOne({ where: { lineUserId: userId } }))?.unreadCount, 2);
 
     const read = await conversations.markRead(user.id, [firstStored.id]);
