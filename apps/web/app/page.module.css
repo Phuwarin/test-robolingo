@@ -1,0 +1,124 @@
+.bot-home {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(48px, 7vw, 100px);
+  padding: 64px 48px;
+  background: radial-gradient(ellipse at 82% 32%, #e8f6ed 0, transparent 55%), #f8faf9;
+}
+.bot-intro {
+  flex: 1;
+  max-width: 430px;
+}
+.bot-icon {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin: 28px 0 24px;
+  border-radius: 24px;
+  color: white;
+  background: #06a85d;
+  box-shadow: 0 10px 24px #06a85d20;
+}
+.bot-intro h1 {
+  margin: 0;
+  font-size: clamp(40px, 5vw, 60px);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+.bot-handle {
+  margin: 12px 0 24px;
+  color: #16884c;
+  font-size: 21px;
+  font-weight: 500;
+}
+.bot-description {
+  margin: 0;
+  color: #697384;
+  line-height: 1.95;
+  font-size: 15px;
+}
+.bot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+.bot-actions a {
+  min-height: 44px;
+  padding-inline: 20px;
+  border-radius: 10px;
+}
+.bot-repository {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  color: #394656;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 14px 18px;
+  border: 1px solid #dce5df;
+  border-radius: 12px;
+  background: #fff;
+}
+.bot-repository svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.bot-repository:hover {
+  color: #16884c;
+}
+.bot-qr {
+  width: 340px;
+  flex-shrink: 0;
+  padding: 28px 28px 32px;
+  text-align: center;
+  background: white;
+  border: 1px solid #e6ece8;
+  border-radius: 28px;
+  box-shadow: 0 20px 60px #203c2d0a;
+}
+.bot-qr img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: auto;
+}
+.bot-qr h2 {
+  margin: 16px 0 10px;
+  color: #252b36;
+  font-size: 19px;
+  font-weight: 600;
+}
+.bot-qr p {
+  margin: 0;
+  color: #7c8794;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.bot-qr strong {
+  color: #16884c;
+  font-weight: 500;
+}
+@media (max-width: 850px) {
+  .bot-home {
+    flex-direction: column;
+    gap: 40px;
+    padding: 48px 24px;
+  }
+  .bot-intro {
+    flex: initial;
+    width: 100%;
+    max-width: 430px;
+  }
+  .bot-qr {
+    width: min(340px, 100%);
+  }
+}

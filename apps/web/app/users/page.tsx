@@ -1,15 +1,10 @@
 "use client";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-type User = { id: string; lineUserId: string; name: string; pictureUrl: string | null; friendStatus: string; friendStatusAt: string | null; createdAt: string; lastMessageId: string | null };
-const statusLabels: Record<string, string> = { follow: "เพิ่มเพื่อนแล้ว", unfollow: "บล็อก OA", unknown: "ไม่ทราบสถานะ" };
+import { UserFilters } from "@/app/users/_components/user-filters";
+import { UserTable } from "@/app/users/_components/user-table";
+import type { User } from "@/app/users/_lib/line-user";
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]),
     [query, setQuery] = useState(""),
@@ -74,83 +69,13 @@ export default function UsersPage() {
         </Button>
       </header>
       <section className="users-panel">
-        <div className="users-filters">
-          <Input
-            aria-label="ค้นหาผู้ใช้"
-            placeholder="ค้นหาชื่อ หรือ LINE User ID…"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-          />
-          <Select
-            value={status}
-            onValueChange={(value) => {
-              setStatus(value);
-            }}
-          >
-            <SelectTrigger aria-label="สถานะผู้ใช้">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent style={{ backgroundColor: "#fff", color: "#252b36" }}>
-              <SelectItem value="all">ทุกสถานะ</SelectItem>
-              <SelectItem value="follow">เพิ่มเพื่อนแล้ว</SelectItem>
-              <SelectItem value="unfollow">บล็อก OA</SelectItem>
-              <SelectItem value="unknown">ไม่ทราบสถานะ</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <UserFilters query={query} status={status} onQueryChange={setQuery} onStatusChange={setStatus} />
         {error && (
           <p role="alert" className="error">
             {error}
           </p>
         )}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ผู้ใช้</TableHead>
-              <TableHead>สถานะ</TableHead>
-              <TableHead>สถานะอัปเดตเมื่อ</TableHead>
-              <TableHead>
-                <span className="sr-only">เปิดแชท</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <div className="user-identity">
-                    <Avatar>
-                      <AvatarImage src={user.pictureUrl || undefined} alt="" />
-                      <AvatarFallback>{user.name.slice(0, 1)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <strong>{user.name}</strong>
-                      <small>{user.lineUserId}</small>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.friendStatus === "follow" ? "secondary" : "outline"}>{statusLabels[user.friendStatus] || statusLabels.unknown}</Badge>
-                </TableCell>
-                <TableCell>{user.friendStatusAt ? new Date(user.friendStatusAt).toLocaleString("th-TH") : "—"}</TableCell>
-                <TableCell>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/?user=${encodeURIComponent(user.id)}`}>เปิดแชท ↗</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {!users.length && (
-              <TableRow>
-                <TableCell colSpan={4} className="users-empty">
-                  {busy ? "กำลังโหลด…" : error ? "ยังไม่สามารถแสดงรายชื่อได้" : query || status !== "all" ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้ เพิ่มเพื่อน OA หรือส่งข้อความเพื่อเริ่มต้น"}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <UserTable users={users} busy={busy} error={error} query={query} status={status} />
         <p className="users-note">“ไม่ทราบสถานะ” หมายถึงระบบยังไม่มี event เพิ่มเพื่อนหรือบล็อกของผู้ใช้นั้น</p>
       </section>
     </main>

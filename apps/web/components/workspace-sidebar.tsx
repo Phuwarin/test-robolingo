@@ -45,8 +45,8 @@ export function WorkspaceSidebar() {
           <UsersRound size={24} />
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="icon" className={path === "/" ? "rail-link active" : "rail-link"}>
-        <Link href="/" title="แชท" aria-label="แชท" aria-current={path === "/" ? "page" : undefined}>
+      <Button asChild variant="ghost" size="icon" className={path === "/chat" ? "rail-link active" : "rail-link"}>
+        <Link href="/chat" title="แชท" aria-label="แชท" aria-current={path === "/chat" ? "page" : undefined}>
           <MessageCircle size={24} />
           {unreadCount > 0 && (
             <Badge className="rail-unread" aria-label={`${unreadCount} ข้อความที่ยังไม่อ่าน`}>
