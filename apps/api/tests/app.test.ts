@@ -132,3 +132,24 @@ test("send endpoint accepts only recipient and text without a client ID", async 
     service.sendMessage = original;
   }
 });
+
+test("read endpoint rejects invalid or missing message IDs", async () => {
+  for (const body of [{}, { messageIds: [] }, { messageIds: [123] }, { messageIds: new Array(1001).fill("x") }]) {
+    const response = await fetch(`${base}/api/conversations/U-test/read`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    assert.equal(response.status, 400);
+  }
+});
+
+test("sidebar unread endpoint returns the total independently of pagination", async () => {
+  const service = app.get(ConversationsService);
+  const original = service.getUnreadCount;
+  service.getUnreadCount = async () => ({ unreadCount: 12 });
+  try {
+    const response = await fetch(`${base}/api/conversations/unread-count`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { unreadCount: 12 });
+    assert.equal(response.headers.get("cache-control"), "no-store");
+  } finally {
+    service.getUnreadCount = original;
+  }
+});

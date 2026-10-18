@@ -8,8 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, RefreshCw, Send, MessageCircle, UsersRound } from "lucide-react";
 import Link from "next/link";
-type Contact = { id: string; name: string; preview: string; pictureUrl?: string | null };
-type Message = { id: string; contactId: string; direction: "received" | "botSent"; body: string; createdAt: string };
+import { mergeConversation, mergeMessage, type Contact, type ChatMessage as Message } from "@/lib/chat-state";
 const samples: Contact[] = [
   { id: "demo-1", name: "พิมพ์ชนก", preview: "สวัสดีค่ะ ขอสอบถามข้อมูลหน่อยค่ะ" },
   { id: "demo-2", name: "ธนกร", preview: "ขอบคุณครับ" },
@@ -26,6 +25,20 @@ export default function Home() {
     [busy, setBusy] = useState(false),
     [refreshing, setRefreshing] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
+  const readInFlight = useRef(new Set<string>());
+  const [viewActive, setViewActive] = useState(false);
+  useEffect(() => {
+    const update = () => setViewActive(document.visibilityState === "visible" && document.hasFocus());
+    update();
+    window.addEventListener("focus", update);
+    window.addEventListener("blur", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      window.removeEventListener("focus", update);
+      window.removeEventListener("blur", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, []);
   async function refresh() {
     setRefreshing(true);
     try {
@@ -36,8 +49,8 @@ export default function Home() {
       }
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setContacts(data.contacts);
-      setMessages(data.messages);
+      setContacts((current) => (mode === "demo" ? data.contacts : (data.contacts as Contact[]).reduce(mergeConversation, current)));
+      setMessages((current) => (mode === "demo" ? data.messages : (data.messages as Message[]).reduce(mergeMessage, current)));
       setMode("live");
       setSelected((value) => {
         const wanted = new URLSearchParams(window.location.search).get("user") || value;
@@ -53,10 +66,51 @@ export default function Home() {
   useEffect(() => {
     void refresh();
   }, []);
-  const connected = useRealtime(() => void refresh(), mode === "live");
+  const connected = useRealtime(() => void refresh(), mode === "live", {
+    onConversationUpdated: (event) => {
+      setContacts((current) => mergeConversation(current, event.contact));
+      if (event.readReceipt) {
+        const ids = new Set(event.readReceipt.messageIds);
+        const readAt = event.readReceipt.readAt;
+        setMessages((current) => current.map((message) => (ids.has(message.id) ? { ...message, readAt } : message)));
+      }
+      setSelected((current) => current || event.lineUserId);
+    },
+    onMessageCreated: (event) => setMessages((current) => mergeMessage(current, event.message)),
+  });
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, selected]);
+  useEffect(() => {
+    if (mode !== "live" || !selected || !viewActive) return;
+    const ids = messages
+      .filter((message) => message.contactId === selected && message.direction === "received" && !message.readAt && !readInFlight.current.has(message.id))
+      .slice(0, 1000)
+      .map((message) => message.id);
+    if (!ids.length) return;
+    ids.forEach((id) => readInFlight.current.add(id));
+    void (async () => {
+      try {
+        const response = await fetch(`/api/conversations/${encodeURIComponent(selected)}/read`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messageIds: ids }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "อัปเดตสถานะอ่านไม่สำเร็จ");
+        setContacts((current) => {
+          const contact = current.find((contact) => contact.id === selected);
+          return contact ? mergeConversation(current, { ...contact, unreadCount: data.unreadCount, updatedAt: data.updatedAt }) : current;
+        });
+        const readIds = new Set<string>(data.messageIds);
+        setMessages((current) => current.map((message) => (readIds.has(message.id) ? { ...message, readAt: data.readAt } : message)));
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "อัปเดตสถานะอ่านไม่สำเร็จ");
+      } finally {
+        ids.forEach((id) => readInFlight.current.delete(id));
+      }
+    })();
+  }, [messages, selected, viewActive, mode]);
   function demo() {
     setMode("demo");
     setContacts(samples);
@@ -79,7 +133,7 @@ export default function Home() {
         const response = await fetch("/api/messages", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(value) });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error);
-        await refresh();
+        if (!connected) await refresh();
       }
       setDraft("");
     } catch (e) {
@@ -109,6 +163,11 @@ export default function Home() {
           <div className="list-tabs">
             <span className="list-tab active">
               แชททั้งหมด <span>{contacts.length}</span>
+              {contacts.some((contact) => (contact.unreadCount || 0) > 0) && (
+                <Badge className="unread-badge" aria-label="ข้อความที่ยังไม่อ่านทั้งหมด">
+                  {contacts.reduce((total, contact) => total + (contact.unreadCount || 0), 0)}
+                </Badge>
+              )}
             </span>
             <Button asChild variant="ghost" size="sm">
               <Link href="/users">
@@ -127,6 +186,7 @@ export default function Home() {
           <div className="contacts">
             {filtered.map((c) => {
               const latest = latestByContact.get(c.id);
+              const lastMessageAt = c.lastMessageAt || latest?.createdAt;
               return (
                 <Button
                   key={c.id}
@@ -145,10 +205,15 @@ export default function Home() {
                   <span className="contact-copy">
                     <span className="contact-title">
                       <strong>{c.name}</strong>
-                      {latest && <time dateTime={latest.createdAt}>{new Date(latest.createdAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</time>}
+                      {lastMessageAt && <time dateTime={lastMessageAt}>{new Date(lastMessageAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</time>}
                     </span>
                     <span className="contact-preview">{c.preview || "เริ่มต้นบทสนทนา"}</span>
                   </span>
+                  {!!c.unreadCount && (
+                    <Badge className="unread-badge" aria-label={`${c.unreadCount} ข้อความที่ยังไม่อ่าน`}>
+                      {c.unreadCount > 99 ? "99+" : c.unreadCount}
+                    </Badge>
+                  )}
                 </Button>
               );
             })}

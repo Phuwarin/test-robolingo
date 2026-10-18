@@ -25,6 +25,9 @@ export class Message extends Model {
   @Column({ type: DataType.TEXT, allowNull: false })
   declare body: string;
 
+  @Column(DataType.DATE)
+  declare readAt: Date | null;
+
   // Timestamps
   @CreatedAt
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })

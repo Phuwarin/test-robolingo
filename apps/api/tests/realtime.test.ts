@@ -29,9 +29,13 @@ test("Socket.IO delivers changes and works after reconnection", async () => {
     const gateway = app.get(RealtimeGateway);
     for (let attempt = 0; attempt < 2; attempt++) {
       await connected(socket);
-      const received = new Promise((resolve) => socket.once("workspace.updated", resolve));
-      gateway.notify("U-test", "message");
-      assert.deepEqual(await received, { lineUserId: "U-test", reason: "message" });
+      const conversation = new Promise<any>((resolve) => socket.once("conversation.updated", resolve));
+      const messageCreated = new Promise<any>((resolve) => socket.once("message.created", resolve));
+      const message = { id: "M-test", lineUserId: "U-test", body: "hello", direction: "received", createdAt: new Date() } as Message;
+      const user = { id: "U-test", name: "Test", lastMessageId: message.id, updatedAt: new Date() } as LineUser;
+      gateway.publishMessage(user, message, message);
+      assert.equal((await conversation).contact.lastMessageId, "M-test");
+      assert.equal((await messageCreated).message.id, "M-test");
       socket.disconnect();
     }
   } finally {

@@ -29,14 +29,14 @@ export class MessagesService {
     const messageId = randomUUID();
     const lineMessageId = result.sentMessages?.[0]?.id || null;
 
-    await this.database.transaction(async (transaction) => {
+    const saved = await this.database.transaction(async (transaction) => {
       const user = await this.users.findOne({
         where: { id: data.to },
         transaction,
         lock: transaction.LOCK.UPDATE,
       });
       if (!user) throw new Error("User no longer exists");
-      await this.messages.create({ id: messageId, lineMessageId, lineUserId: data.to, direction: "botSent", body: data.text.trim() }, { transaction });
+      const message = await this.messages.create({ id: messageId, lineMessageId, lineUserId: data.to, direction: "botSent", body: data.text.trim() }, { transaction });
       const latest = await this.messages.findOne({
         where: { lineUserId: data.to },
         order: [
@@ -54,8 +54,9 @@ export class MessagesService {
           transaction,
         },
       );
+      return { user, message, latest };
     });
-    this.realtime.notify(data.to, "message");
+    this.realtime.publishMessage(saved.user, saved.message, saved.latest);
     return true;
   }
 }

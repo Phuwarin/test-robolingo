@@ -36,6 +36,7 @@ try {
       transaction,
     });
     await database.query(await Bun.file(new URL("../migrations/007_line_message_id.sql", import.meta.url)).text(), { transaction });
+    await database.query(await Bun.file(new URL("../migrations/008_unread_count.sql", import.meta.url)).text(), { transaction });
   });
   console.log("Database migration completed");
 } finally {

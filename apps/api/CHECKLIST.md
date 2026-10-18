@@ -21,3 +21,8 @@
 
 - Realtime (Socket.IO)
   - [ ] workspace.updated � message / user
+
+- Unread
+  - [ ] GET /api/conversations/unread-count
+  - [ ] POST /api/conversations/:lineUserId/read
+  - [ ] unreadCount / readAt / conversation.updated

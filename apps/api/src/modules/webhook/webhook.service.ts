@@ -39,7 +39,7 @@ export class WebhookService {
       /* Preserve the user ID if the profile cannot be loaded. */
     }
     const at = new Date(timestamp);
-    await this.database.transaction(async (transaction) => {
+    const saved = await this.database.transaction(async (transaction) => {
       const [user] = await this.users.findOrCreate({
         where: { id: userId },
         defaults: { id: userId, name: name || userId, updatedAt: at },
@@ -58,7 +58,7 @@ export class WebhookService {
           transaction,
         },
       );
-      await this.messages.findOrCreate({
+      const [storedMessage, created] = await this.messages.findOrCreate({
         where: { id: message.id },
         defaults: { id: message.id, lineMessageId: message.id, lineUserId: userId, direction: "received", body: message.type === "text" ? message.text || "" : `[${message.type}]`, createdAt: at },
         transaction,
@@ -74,13 +74,15 @@ export class WebhookService {
       await user.update(
         {
           lastMessageId: latest?.id || null,
+          unreadCount: user.unreadCount + (created ? 1 : 0),
         },
         {
           transaction,
         },
       );
+      return { user, message: storedMessage, latest, created };
     });
-    this.realtime.notify(userId, "message");
+    if (saved.created) this.realtime.publishMessage(saved.user, saved.message, saved.latest);
   }
 
   async handleFollow(userId: string, timestamp: number) {

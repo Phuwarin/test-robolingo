@@ -25,6 +25,9 @@ export class LineUser extends Model {
   @Column(DataType.TEXT)
   declare lastMessageId: string | null;
 
+  @Column({ type: DataType.INTEGER, allowNull: false, defaultValue: 0 })
+  declare unreadCount: number;
+
   // Timestamps
   @CreatedAt
   @Column({ type: DataType.DATE, allowNull: false, defaultValue: DataType.NOW })
