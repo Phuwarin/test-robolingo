@@ -1,61 +1,26 @@
 "use client";
-import { useRealtime } from "@/hooks/use-realtime";
+import styles from "./page.module.css";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { usersQuery } from "@/lib/api-queries";
 import { Button } from "@/components/ui/button";
 import { UserFilters } from "@/app/users/_components/user-filters";
 import { UserTable } from "@/app/users/_components/user-table";
-import type { User } from "@/app/users/_lib/line-user";
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]),
-    [query, setQuery] = useState(""),
-    [status, setStatus] = useState("all"),
-    [total, setTotal] = useState(0),
-    [busy, setBusy] = useState(true),
-    [error, setError] = useState(""),
-    [version, setVersion] = useState(0);
-  useRealtime(() => setVersion((value) => value + 1), true, {
-    onConversationUpdated: ({ conversation }) => {
-      if (!conversation) return;
-      setUsers((current) =>
-        current.map((user) =>
-          user.id === conversation.id
-            ? {
-                ...user,
-                name: conversation.name,
-                pictureUrl: conversation.pictureUrl ?? user.pictureUrl,
-                friendStatus: conversation.friendStatus ?? user.friendStatus,
-                lastMessageId: conversation.lastMessageId ?? user.lastMessageId,
-              }
-            : user,
-        ),
-      );
-    },
-  });
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("all");
+  const [search, setSearch] = useState("");
   useEffect(() => {
-    const controller = new AbortController();
-    setBusy(true);
-    const timer = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ q: query, status: status === "all" ? "" : status });
-        const response = await fetch(`/api/line-users?${params}`, { signal: controller.signal });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "โหลดข้อมูลไม่ได้");
-        setUsers(data.users);
-        setTotal(data.total);
-        setError("");
-      } catch (e) {
-        if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "เชื่อมต่อ API ไม่ได้");
-      } finally {
-        if (!controller.signal.aborted) setBusy(false);
-      }
-    }, 250);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [query, status, version]);
+    const timer = setTimeout(() => setSearch(query), 250);
+    return () => clearTimeout(timer);
+  }, [query]);
+  const result = useQuery(usersQuery(search, status === "all" ? "" : status));
+  const users = result.data?.users || [];
+  const total = result.data?.total || 0;
+  const busy = result.isFetching;
+  const error = result.error?.message || "";
   return (
-    <main className="users-page">
+    <main className={`users-page ${styles.page}`}>
       <header className="heading">
         <div>
           <div className="eyebrow">LINE OFFICIAL ACCOUNT</div>
@@ -64,11 +29,11 @@ export default function UsersPage() {
           </h1>
           <p>รายชื่อผู้ใช้และสถานะการเพิ่มเพื่อนของบัญชีนี้</p>
         </div>
-        <Button variant="outline" disabled={busy} onClick={() => setVersion((v) => v + 1)}>
+        <Button variant="outline" disabled={busy} onClick={() => void result.refetch()}>
           รีเฟรช
         </Button>
       </header>
-      <section className="users-panel">
+      <section className={`users-panel ${styles.panel}`}>
         <UserFilters query={query} status={status} onQueryChange={setQuery} onStatusChange={setStatus} />
         {error && (
           <p role="alert" className="error">

@@ -127,3 +127,14 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 ## 6. Connection ร่วมบนเว็บ
 
 `providers/realtime-provider.tsx` ครอบที่ `app/layout.tsx` และสร้าง Socket connection เดียวต่อแท็บ Sidebar, Chat และ Users เรียก `useRealtime()` เพื่อสมัครรับ event จาก connection นี้ เมื่อเปลี่ยนหน้า hook ยกเลิกเฉพาะ listener ของตัวเอง ไม่ตัด connection ร่วม Provider จัดการ connect/disconnect และสถานะการเชื่อมต่อ โดย reconnect สำเร็จจะเรียก refresh ของผู้ใช้งานแต่ละจุด
+
+## 7. Cache ข้ามหน้าด้วย React Query
+
+`providers/query-provider.tsx` ครอบ RealtimeProvider ใน layout และเก็บ QueryClient เดียวต่อแท็บ ข้อมูล API อยู่ใน cache แทน state ของแต่ละหน้า จึงกลับมาหน้าเดิมแล้วแสดงข้อมูลได้ทันที ไม่ล้างตารางหรือประวัติระหว่างโหลดใหม่เบื้องหลัง Cache ที่ไม่ได้ใช้งานเก็บไว้ 30 นาที ไม่ persist หลังปิดแท็บหรือ reload ทั้งหน้า
+
+- รายชื่อผู้ใช้: `["line-users", query, status]` Sidebar ใช้ query ที่ไม่มีตัวกรองร่วมกับหน้า Users
+- รายการแชท: `["conversations"]`
+- ประวัติข้อความ: `["messages", lineUserId]` เปลี่ยนห้องแล้วยังโหลด API ใหม่ แต่แสดง cache ของห้องนั้นทันทีหากเคยโหลด
+- `message.update` และ `message.sent` อัปเดต cache ใน RealtimeProvider โดยตรง แม้หน้าที่เกี่ยวข้องถูก unmount ไปแล้ว ไม่เรียก API ซ้ำทุกข้อความ
+- `workspace.updated` และ Socket connect/reconnect ทำให้ query โหลดข้อมูลใหม่เบื้องหลัง ข้อมูลเดิมยังแสดงอยู่
+- การอ่านและการส่งใช้ mutation ส่วน draft คำค้นหา และโหมด demo ยังเป็น state ในหน้า ไม่ใช้ Zustand

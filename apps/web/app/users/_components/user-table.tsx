@@ -4,9 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { statusLabels, type User } from "@/app/users/_lib/line-user";
-type Props = { users: User[]; busy: boolean; error: string; query: string; status: string };
+import { statusLabels, type User } from "@/lib/line-user";
+type Props = {
+  users: User[];
+  busy: boolean;
+  error: string;
+  query: string;
+  status: string;
+};
 export function UserTable({ users, busy, error, query, status }: Props) {
+  let emptyMessage = "ยังไม่มีผู้ใช้ เพิ่มเพื่อน OA หรือส่งข้อความเพื่อเริ่มต้น";
+  if (busy) emptyMessage = "กำลังโหลด…";
+  else if (error) emptyMessage = "ยังไม่สามารถแสดงรายชื่อได้";
+  else if (query || status !== "all") emptyMessage = "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง";
   return (
     <Table>
       <TableHeader>
@@ -48,7 +58,7 @@ export function UserTable({ users, busy, error, query, status }: Props) {
         {!users.length && (
           <TableRow>
             <TableCell colSpan={4} className="users-empty">
-              {busy ? "กำลังโหลด…" : error ? "ยังไม่สามารถแสดงรายชื่อได้" : query || status !== "all" ? "ไม่พบผู้ใช้ที่ตรงกับตัวกรอง" : "ยังไม่มีผู้ใช้ เพิ่มเพื่อน OA หรือส่งข้อความเพื่อเริ่มต้น"}
+              {emptyMessage}
             </TableCell>
           </TableRow>
         )}

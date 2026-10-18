@@ -2,7 +2,10 @@
 import type { ConversationUpdated, MessageCreated } from "@/lib/chat-state";
 import { useEffect, useRef } from "react";
 import { useRealtimeConnection } from "@/providers/realtime-provider";
-type RealtimeHandlers = { onConversationUpdated?: (event: ConversationUpdated) => void; onMessageCreated?: (event: MessageCreated) => void };
+type RealtimeHandlers = {
+  onConversationUpdated?: (event: ConversationUpdated) => void;
+  onMessageCreated?: (event: MessageCreated) => void;
+};
 export function useRealtime(onRefresh: () => void, enabled = true, handlers: RealtimeHandlers = {}) {
   const callback = useRef(onRefresh);
   const eventHandlers = useRef(handlers);

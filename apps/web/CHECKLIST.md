@@ -31,7 +31,7 @@
   - [ ] ค้นหาชื่อ / ID / ข้อความล่าสุด
   - [ ] unread ราย User และยอดรวม
   - [ ] เลือกห้องแชท / รีเฟรช / สถานะการเชื่อมต่อ
-- [ ] `app/chat/_components/conversation-header.tsx` — ข้อมูล User ที่เลือก
+- [x] `app/chat/_components/conversation-header.tsx` — ข้อมูล User ที่เลือก
 - [ ] `app/chat/_components/message-thread.tsx`
   - [ ] แสดงข้อความเฉพาะห้องที่เปิด
   - [ ] ลำดับเวลาและฝั่ง received / botSent
@@ -66,7 +66,7 @@
   - [ ] สถานะกำลังโหลด / ไม่พบผู้ใช้ / error
 - [ ] `app/users/_components/user-filters.tsx` — ช่องค้นหาและ dropdown สถานะ พื้นหลังทึบ
 - [ ] `app/users/_components/user-table.tsx` — รูป ชื่อ LINE User ID สถานะ เวลา และลิงก์เปิดห้องแชทของ User
-- [ ] `app/users/_lib/line-user.ts` — type User และข้อความสถานะ
+- [ ] `lib/line-user.ts` — type User และข้อความสถานะ
 
 ## Realtime และ State ร่วม
 
@@ -89,3 +89,13 @@
 - [ ] `components/ui/` — shadcn Avatar / Badge / Button / Input / ScrollArea / Select / Separator / Table / Textarea
 - [ ] `next.config.ts` — API proxy / allowedDevOrigins / deploymentId สำหรับ cache ของ asset
 - [ ] Desktop และมือถือ — หน้าแรก / Users / Chat
+
+## React Query
+
+- [ ] `providers/query-provider.tsx` — cache กลางข้ามหน้า อายุ cache 30 นาที
+- [ ] `lib/api-queries.ts` — query ของรายชื่อผู้ใช้ รายการแชท และข้อความแยกห้อง
+- [ ] `lib/realtime-cache.ts` — Socket อัปเดต cache แม้หน้าที่เกี่ยวข้องไม่ได้เปิดอยู่
+- [ ] เปลี่ยนหน้าไปกลับแล้วแสดงข้อมูล cache ทันที โดยไม่ล้างข้อมูลระหว่าง refetch
+- [ ] เลือกห้องแชทแล้วโหลดประวัติใหม่เบื้องหลัง พร้อมแสดง cache ของห้องนั้นถ้ามี
+- [ ] Sidebar และ Users ใช้ cache รายชื่อผู้ใช้ชุดเดียวกันเมื่อไม่มีตัวกรอง
+- [ ] ไม่ใช้ response เก่าทับ unread/readAt ที่อัปเดตผ่าน Socket

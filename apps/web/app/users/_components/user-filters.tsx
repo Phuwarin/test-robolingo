@@ -1,7 +1,12 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-type Props = { query: string; status: string; onQueryChange: (value: string) => void; onStatusChange: (value: string) => void };
+type Props = {
+  query: string;
+  status: string;
+  onQueryChange: (value: string) => void;
+  onStatusChange: (value: string) => void;
+};
 export function UserFilters({ query, status, onQueryChange, onStatusChange }: Props) {
   return (
     <div className="users-filters">
