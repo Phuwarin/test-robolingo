@@ -1,4 +1,5 @@
 "use client";
+import styles from "./conversation-list.module.css";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,9 @@ type Props = {
   onDemo: () => void;
 };
 export function ConversationList({ conversations, selected, query, refreshing, connected, mode, onQueryChange, onSelect, onRefresh, onDemo }: Props) {
-  const filtered = conversations.filter((c) => (c.name + c.id + (c.lastMessage?.body || "")).toLowerCase().includes(query.toLowerCase()));
+  const filtered = conversations.filter((c) => {
+    return (c.name + c.id + (c.lastMessage?.body || "")).toLowerCase().includes(query.toLowerCase());
+  });
   return (
     <aside className="conversation-list" aria-label="รายชื่อบทสนทนา">
       <div className="list-tabs">
@@ -48,6 +51,7 @@ export function ConversationList({ conversations, selected, query, refreshing, c
       <div className="contacts">
         {filtered.map((c) => {
           const lastMessageAt = c.lastMessageTime;
+          const displayTime = lastMessageAt ? new Date(lastMessageAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) : "";
           return (
             <Button key={c.id} variant="ghost" className={`contact ${c.id === selected ? "active" : ""}`} onClick={() => onSelect(c.id)}>
               <Avatar className="avatar">
@@ -57,15 +61,21 @@ export function ConversationList({ conversations, selected, query, refreshing, c
               <span className="contact-copy">
                 <span className="contact-title">
                   <strong>{c.name}</strong>
-                  {lastMessageAt && <time dateTime={lastMessageAt}>{new Date(lastMessageAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</time>}
                 </span>
                 <span className="contact-preview">{c.lastMessage?.body || "เริ่มต้นบทสนทนา"}</span>
               </span>
-              {!!c.unreadCount && (
-                <Badge className="unread-badge" aria-label={`${c.unreadCount} ข้อความที่ยังไม่อ่าน`}>
-                  {c.unreadCount > 99 ? "99+" : c.unreadCount}
-                </Badge>
-              )}
+              <span className={styles.metadata}>
+                <time className={styles.time} dateTime={lastMessageAt || undefined}>
+                  {displayTime || "\u00a0"}
+                </time>
+                <span className={styles.unread}>
+                  {!!c.unreadCount && (
+                    <Badge className="unread-badge" aria-label={`${c.unreadCount} ข้อความที่ยังไม่อ่าน`}>
+                      {c.unreadCount > 99 ? "99+" : c.unreadCount}
+                    </Badge>
+                  )}
+                </span>
+              </span>
             </Button>
           );
         })}

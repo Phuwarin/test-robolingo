@@ -3,7 +3,14 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
-type Props = { draft: string; busy: boolean; isBlocked: boolean; mode: "live" | "demo"; onDraftChange: (value: string) => void; onSend: (event: FormEvent) => void };
+type Props = {
+  draft: string;
+  busy: boolean;
+  isBlocked: boolean;
+  mode: "live" | "demo";
+  onDraftChange: (value: string) => void;
+  onSend: (event: FormEvent) => void;
+};
 export function MessageComposer({ draft, busy, isBlocked, mode, onDraftChange, onSend }: Props) {
   return (
     <form className="composer" onSubmit={onSend}>
