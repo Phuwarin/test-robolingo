@@ -49,7 +49,7 @@ export function UserTable({ users, busy, error, query, status }: Props) {
             <TableCell>{user.friendStatusAt ? new Date(user.friendStatusAt).toLocaleString("th-TH") : "—"}</TableCell>
             <TableCell>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/chat?user=${encodeURIComponent(user.id)}`}>เปิดแชท ↗</Link>
+                <Link href={`/chat/${encodeURIComponent(user.id)}`}>เปิดแชท ↗</Link>
               </Button>
             </TableCell>
           </TableRow>

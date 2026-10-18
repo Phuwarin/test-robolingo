@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import { conversationsQuery, messagesQuery } from "@/lib/api-queries";
@@ -11,10 +12,12 @@ import { useSendMessage } from "./use-send-message";
 export function useChat() {
   const client = useQueryClient();
   const { mode, demoConversations, demoMessages, startDemo, stopDemo, sendDemoMessage } = useChatDemo();
-  const [selected, setSelected] = useState("");
+  const router = useRouter();
+  const params = useParams<{ id?: string }>();
+  const [demoSelected, setDemoSelected] = useState("");
+  const selected = mode === "demo" ? demoSelected : params.id || "";
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
-  const initialSelectionHandled = useRef(false);
   const connected = useRealtimeStore((state) => state.connected);
   const list = useQuery({ ...conversationsQuery(), enabled: mode === "live" });
   const history = useQuery({ ...messagesQuery(selected), enabled: mode === "live" && !!selected });
@@ -31,28 +34,25 @@ export function useChat() {
   });
 
   useEffect(() => {
-    if (mode !== "live" || !list.data || initialSelectionHandled.current) return;
-    initialSelectionHandled.current = true;
-    const requestedUser = new URLSearchParams(window.location.search).get("user");
-    if (requestedUser && list.data.some((item) => item.id === requestedUser)) {
-      setSelected(requestedUser);
-    }
-  }, [list.data, mode]);
+    setDraft("");
+    setError("");
+  }, [selected, setDraft]);
 
   async function refresh() {
     setError("");
     if (mode === "demo") {
       stopDemo();
-      setSelected("");
+      router.push("/chat", { scroll: false });
     }
     await refreshWorkspace(client);
   }
   function demo() {
-    setSelected(startDemo());
+    setDemoSelected(startDemo());
     setError("");
   }
   function selectConversation(id: string) {
-    setSelected(id);
+    if (mode === "demo") setDemoSelected(id);
+    else router.push(`/chat/${encodeURIComponent(id)}`, { scroll: false });
     setDraft("");
     setError("");
   }
