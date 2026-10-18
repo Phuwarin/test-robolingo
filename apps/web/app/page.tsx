@@ -1,7 +1,7 @@
 import styles from "./page.module.css";
 import Image from "next/image";
 import Link from "next/link";
-import { CodeXml, MessageCircle, ArrowUpRight } from "lucide-react";
+import { CodeXml, MessageCircle, ArrowUpRight, FileUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -32,11 +32,18 @@ export default function Home() {
             <Link href="/chat">เปิดเว็บแชท</Link>
           </Button>
         </div>
-        <a className={styles["bot-repository"]} href="https://github.com/Phuwarin/test-robolingo" target="_blank" rel="noreferrer">
-          <CodeXml size={17} />
-          Phuwarin/test-robolingo
-          <ArrowUpRight size={14} />
-        </a>
+        <div className={styles["bot-links"]}>
+          <a className={styles["bot-repository"]} href="https://github.com/Phuwarin/test-robolingo" target="_blank" rel="noreferrer">
+            <CodeXml size={17} />
+            Phuwarin/test-robolingo
+            <ArrowUpRight size={14} />
+          </a>
+          <a className={styles["bot-repository"]} href="https://resume.9phuwarin.dev/en/" target="_blank" rel="noreferrer">
+            <FileUser size={20} />
+            Resume
+            <ArrowUpRight size={16} />
+          </a>
+        </div>
       </section>
       <section className={styles["bot-qr"]} aria-label="QR เพิ่มเพื่อน Test Bot">
         <Image src="/test-bot-qr.png" alt="QR Code สำหรับเพิ่มเพื่อน Test Bot บน LINE" width={360} height={360} priority unoptimized />
