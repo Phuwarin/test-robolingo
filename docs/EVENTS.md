@@ -123,3 +123,7 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 - เวลาสลับห้อง เว็บยกเลิก request ประวัติของห้องก่อนหน้าเพื่อไม่ให้ผลลัพธ์เก่ารบกวนห้องใหม่
 
 หน้า Users และ `GET /api/line-users` ไม่มี pagination คืนผู้ใช้ทั้งหมดที่ตรงกับคำค้นหาและสถานะ ไม่มี `page` หรือ `limit`
+
+## 6. Connection ร่วมบนเว็บ
+
+`providers/realtime-provider.tsx` ครอบที่ `app/layout.tsx` และสร้าง Socket connection เดียวต่อแท็บ Sidebar, Chat และ Users เรียก `useRealtime()` เพื่อสมัครรับ event จาก connection นี้ เมื่อเปลี่ยนหน้า hook ยกเลิกเฉพาะ listener ของตัวเอง ไม่ตัด connection ร่วม Provider จัดการ connect/disconnect และสถานะการเชื่อมต่อ โดย reconnect สำเร็จจะเรียก refresh ของผู้ใช้งานแต่ละจุด

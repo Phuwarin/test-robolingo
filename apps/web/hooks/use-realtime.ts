@@ -1,49 +1,40 @@
 "use client";
 import type { ConversationUpdated, MessageCreated } from "@/lib/chat-state";
-
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
-
+import { useEffect, useRef } from "react";
+import { useRealtimeConnection } from "@/providers/realtime-provider";
 type RealtimeHandlers = { onConversationUpdated?: (event: ConversationUpdated) => void; onMessageCreated?: (event: MessageCreated) => void };
-
 export function useRealtime(onRefresh: () => void, enabled = true, handlers: RealtimeHandlers = {}) {
   const callback = useRef(onRefresh);
   const eventHandlers = useRef(handlers);
-  const [connected, setConnected] = useState(false);
-
+  const { socket, connected } = useRealtimeConnection();
   useEffect(() => {
     callback.current = onRefresh;
     eventHandlers.current = handlers;
   }, [onRefresh, handlers]);
-
   useEffect(() => {
-    if (!enabled) {
-      setConnected(false);
-      return;
-    }
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4099", { transports: ["websocket"] });
+    if (!enabled || !socket) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const refresh = () => {
       clearTimeout(timer);
       timer = setTimeout(() => callback.current(), 75);
     };
-    socket.on("connect", () => {
-      setConnected(true);
-      refresh();
-    });
-    socket.on("disconnect", () => setConnected(false));
-    socket.on("connect_error", () => setConnected(false));
-    socket.on("workspace.updated", refresh);
-    socket.on("message.update", (event: ConversationUpdated) => {
+    const conversationUpdated = (event: ConversationUpdated) => {
       if (eventHandlers.current.onConversationUpdated) eventHandlers.current.onConversationUpdated(event);
       else refresh();
-    });
-    socket.on("message.sent", (event: MessageCreated) => eventHandlers.current.onMessageCreated?.(event));
+    };
+    const messageCreated = (event: MessageCreated) => eventHandlers.current.onMessageCreated?.(event);
+    socket.on("connect", refresh);
+    socket.on("workspace.updated", refresh);
+    socket.on("message.update", conversationUpdated);
+    socket.on("message.sent", messageCreated);
+    if (socket.connected) refresh();
     return () => {
       clearTimeout(timer);
-      socket.disconnect();
+      socket.off("connect", refresh);
+      socket.off("workspace.updated", refresh);
+      socket.off("message.update", conversationUpdated);
+      socket.off("message.sent", messageCreated);
     };
-  }, [enabled]);
-
-  return connected;
+  }, [enabled, socket]);
+  return enabled && connected;
 }
