@@ -1,6 +1,6 @@
 import { RealtimeGateway } from "../realtime/realtime.gateway.js";
 import { randomUUID } from "node:crypto";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, ForbiddenException } from "@nestjs/common";
 import { InjectModel, InjectConnection } from "@nestjs/sequelize";
 import { Sequelize } from "sequelize-typescript";
 import { LineUser, Message } from "../../database/models/index.js";
@@ -19,6 +19,10 @@ export class MessagesService {
     });
     if (!recipient) {
       return false;
+    }
+
+    if (recipient.friendStatus === "unfollow") {
+      throw new ForbiddenException("ผู้ใช้บล็อก OA ไม่สามารถส่งข้อความได้");
     }
 
     const response = await line("message/push", {

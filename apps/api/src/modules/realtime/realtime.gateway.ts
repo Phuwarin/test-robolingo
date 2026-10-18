@@ -24,6 +24,7 @@ export class RealtimeGateway {
         id: user.id,
         name: user.name,
         pictureUrl: user.pictureUrl,
+        friendStatus: user.friendStatus,
         lastMessageId: user.lastMessageId,
         unreadCount: user.unreadCount,
         lastMessageAt: latest?.createdAt || null,

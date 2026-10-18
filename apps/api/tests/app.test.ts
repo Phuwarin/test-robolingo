@@ -1,3 +1,4 @@
+import { ForbiddenException } from "@nestjs/common";
 import { MessagesService } from "../src/modules/messages/messages.service.js";
 import { LineUsersService } from "../src/modules/line-users/line-users.service.js";
 import { WebhookService } from "../src/modules/webhook/webhook.service.js";
@@ -151,5 +152,24 @@ test("sidebar unread endpoint returns the total independently of pagination", as
     assert.equal(response.headers.get("cache-control"), "no-store");
   } finally {
     service.getUnreadCount = original;
+  }
+});
+
+test("send endpoint preserves the blocked-user 403 response", async () => {
+  const service = app.get(MessagesService),
+    original = service.sendMessage;
+  service.sendMessage = async () => {
+    throw new ForbiddenException("Blocked recipient");
+  };
+  try {
+    const response = await fetch(`${base}/api/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", origin: process.env.WEB_ORIGIN || "http://localhost:3099" },
+      body: JSON.stringify({ to: "U-blocked", text: "hello" }),
+    });
+    assert.equal(response.status, 403);
+    assert.equal((await response.json()).error, "Blocked recipient");
+  } finally {
+    service.sendMessage = original;
   }
 });

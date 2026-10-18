@@ -2,6 +2,7 @@ export type Contact = {
   id: string;
   name: string;
   preview: string;
+  friendStatus?: "follow" | "unfollow" | "unknown";
   unreadCount?: number;
   pictureUrl?: string | null;
   lastMessageId?: string | null;

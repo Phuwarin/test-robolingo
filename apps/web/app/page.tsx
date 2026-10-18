@@ -120,7 +120,7 @@ export default function Home() {
   }
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!draft.trim() || !selected || busy) return;
+    if (!draft.trim() || !selected || busy || isBlocked) return;
     setBusy(true);
     setError("");
     const value = { to: selected, text: draft.trim() };
@@ -143,6 +143,7 @@ export default function Home() {
     }
   }
   const contact = contacts.find((c) => c.id === selected);
+  const isBlocked = contact?.friendStatus === "unfollow";
   const latestByContact = new Map<string, Message>();
   for (const message of messages) {
     const current = latestByContact.get(message.contactId);
@@ -269,13 +270,19 @@ export default function Home() {
                 <div ref={bottom} />
               </div>
               <form className="composer" onSubmit={send}>
+                {isBlocked && (
+                  <p className="blocked-notice" role="status">
+                    ผู้ใช้บล็อก OA ไม่สามารถพิมพ์หรือส่งข้อความได้
+                  </p>
+                )}
                 <label htmlFor="message" className="sr-only">
                   ข้อความตอบกลับ
                 </label>
                 <Textarea
                   id="message"
                   maxLength={5000}
-                  placeholder="พิมพ์ข้อความ…"
+                  disabled={isBlocked}
+                  placeholder={isBlocked ? "ผู้ใช้บล็อก OA" : "พิมพ์ข้อความ…"}
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   onKeyDown={(e) => {
@@ -287,7 +294,7 @@ export default function Home() {
                 />
                 <div className="composer-actions">
                   <small>{mode === "demo" ? "โหมดทดลอง · ข้อความจะไม่ส่งไปยัง LINE" : "Enter เพื่อส่ง · Shift + Enter เพื่อขึ้นบรรทัดใหม่"}</small>
-                  <Button type="submit" className="send-button" disabled={busy || !draft.trim()}>
+                  <Button type="submit" className="send-button" disabled={busy || !draft.trim() || isBlocked}>
                     <Send size={16} />
                     {busy ? "กำลังส่ง…" : "ส่ง"}
                   </Button>

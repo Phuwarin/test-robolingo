@@ -1,4 +1,4 @@
-import { Body, Controller, Post, HttpCode, Inject, Req, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException } from "@nestjs/common";
+import { Body, Controller, Post, HttpCode, Inject, Req, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException, HttpException } from "@nestjs/common";
 import type { Request } from "express";
 import { MessagesService } from "./messages.service.js";
 @Controller("messages")
@@ -16,7 +16,8 @@ export class MessagesController {
         to: data.to,
         text: data.text,
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new BadGatewayException("ส่งไม่สำเร็จ กรุณาตรวจสอบ LINE token / โควตา แล้วลองอีกครั้ง");
     }
     if (!found) throw new NotFoundException("ไม่พบผู้ใช้");
