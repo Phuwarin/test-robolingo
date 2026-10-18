@@ -159,20 +159,6 @@ test("message history requires a user and forwards only that user ID", async () 
   }
 });
 
-test("sidebar unread endpoint returns the total independently of pagination", async () => {
-  const service = app.get(ConversationsService);
-  const original = service.getUnreadCount;
-  service.getUnreadCount = async () => ({ unreadCount: 12, users: [] });
-  try {
-    const response = await fetch(`${base}/api/conversations/unread-count`);
-    assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { unreadCount: 12, users: [] });
-    assert.equal(response.headers.get("cache-control"), "no-store");
-  } finally {
-    service.getUnreadCount = original;
-  }
-});
-
 test("send endpoint preserves the blocked-user 403 response", async () => {
   const service = app.get(MessagesService),
     original = service.sendMessage;

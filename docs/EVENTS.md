@@ -59,7 +59,7 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 | หน้า Users   | อัปเดตแถว User ที่อยู่ในรายการปัจจุบันจาก `conversation` โดยไม่เรียก API ซ้ำ                          |
 | Sidebar      | แทนค่า unread ของ User คนนั้นใน state แล้วรวมยอดใหม่ โดยไม่เรียก API ซ้ำ                              |
 
-ทั้งหน้าแชท Users และ sidebar ใช้ payload โดยตรง สำหรับ Users จะคงสมาชิกของรายการปัจจุบันไว้ การค้นหา เปลี่ยนตัวกรอง รีเฟรช และ reconnect จึงโหลดรายการจาก API ใหม่ ส่วน sidebar โหลด `users: [{ id, unreadCount, updatedAt }]` จาก `GET /api/conversations/unread-count` ตอนเริ่ม/reconnect แล้วแทนยอดรายคนจาก Socket ไม่บวกสะสม จึงไม่เพิ่มซ้ำเมื่อรับ event เดิม
+ทั้งหน้าแชท Users และ sidebar ใช้ payload โดยตรง สำหรับ Users จะคงสมาชิกของรายการปัจจุบันไว้ การค้นหา เปลี่ยนตัวกรอง รีเฟรช และ reconnect จึงโหลดรายการจาก API ใหม่ ส่วน sidebar โหลด Line User ทั้งหมดซึ่งมี `id`, `unreadCount`, `updatedAt` จาก `GET /api/line-users` โดยไม่ส่งตัวกรอง ตอนเริ่ม/reconnect แล้วแทนยอดรายคนจาก Socket ไม่บวกสะสม จึงไม่เพิ่มซ้ำเมื่อรับ event เดิม
 
 ### `message.sent`
 

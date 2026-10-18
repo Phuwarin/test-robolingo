@@ -22,13 +22,6 @@ export class ConversationsService {
     });
     return { conversations };
   }
-  async getUnreadCount() {
-    const users = await this.users.findAll({
-      attributes: ["id", "unreadCount", "updatedAt"],
-      raw: true,
-    });
-    return { unreadCount: users.reduce((total, user) => total + user.unreadCount, 0), users };
-  }
   async markRead(lineUserId: string, messageIds: string[]) {
     const readAt = new Date();
     const saved = await this.database.transaction(async (transaction) => {

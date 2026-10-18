@@ -16,7 +16,7 @@ export function WorkspaceSidebar() {
     const controller = new AbortController();
     void (async () => {
       try {
-        const response = await fetch("/api/conversations/unread-count", { cache: "no-store", signal: controller.signal });
+        const response = await fetch("/api/line-users", { cache: "no-store", signal: controller.signal });
         if (!response.ok) return;
         const data = await response.json();
         if (!Array.isArray(data.users)) return;

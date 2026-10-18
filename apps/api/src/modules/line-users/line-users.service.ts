@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Op, type WhereOptions } from "sequelize";
+import { Op, literal, type WhereOptions } from "sequelize";
 import { LineUser } from "../../database/models/index.js";
 @Injectable()
 export class LineUsersService {
@@ -13,6 +13,7 @@ export class LineUsersService {
     const users = await this.users.findAll({
       where,
       order: [
+        [literal('CASE WHEN "LineUser"."friend_status" = \'unfollow\' THEN 1 ELSE 0 END'), "ASC"],
         ["updatedAt", "DESC"],
         ["id", "ASC"],
       ],

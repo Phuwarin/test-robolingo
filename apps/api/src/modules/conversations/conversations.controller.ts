@@ -19,9 +19,4 @@ export class ConversationsController {
       throw new BadRequestException("Provide 1–1000 message IDs");
     return this.service.markRead(lineUserId, data.messageIds);
   }
-  @Get("unread-count")
-  @Header("Cache-Control", "no-store")
-  async unreadCount() {
-    return this.service.getUnreadCount();
-  }
 }

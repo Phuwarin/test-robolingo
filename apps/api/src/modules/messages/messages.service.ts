@@ -20,7 +20,6 @@ export class MessagesService {
         ["createdAt", "ASC"],
         ["id", "ASC"],
       ],
-      raw: true,
     });
   }
   async sendMessage(data: { to: string; text: string }) {
