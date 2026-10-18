@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
-  deploymentId: "line-desk-layout-v2",
+  deploymentId: process.env.NODE_ENV === "development" ? `line-desk-dev-${Date.now()}` : process.env.NEXT_DEPLOYMENT_ID,
   allowedDevOrigins: ["test-web.9phuwarin.dev"],
   async rewrites() {
     const api = process.env.API_PROXY_URL || "http://localhost:4099";

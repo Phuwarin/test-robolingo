@@ -40,6 +40,7 @@ export class WebhookService {
     }
     const at = new Date(timestamp);
     const saved = await this.database.transaction(async (transaction) => {
+      // คาดว่าจะไม่มีกรณีที่ยังไม่มี User เพราะระบบเริ่มใช้งานพร้อมกัน และ event follow จะสร้าง User ไว้ก่อนแล้ว
       const [user] = await this.users.findOrCreate({
         where: { lineUserId: userId },
         defaults: { lineUserId: userId, name: name || userId, updatedAt: at },
@@ -120,7 +121,7 @@ export class WebhookService {
         },
       );
     });
-    this.realtime.notify(userId, "user");
+    this.realtime.publishUserUpdated(userId);
   }
 
   async handleUnfollow(userId: string, timestamp: number) {
@@ -147,6 +148,6 @@ export class WebhookService {
         },
       );
     });
-    this.realtime.notify(userId, "user");
+    this.realtime.publishUserUpdated(userId);
   }
 }

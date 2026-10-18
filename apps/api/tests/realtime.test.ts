@@ -29,13 +29,15 @@ test("Socket.IO delivers changes and works after reconnection", async () => {
     const gateway = app.get(RealtimeGateway);
     for (let attempt = 0; attempt < 2; attempt++) {
       await connected(socket);
-      const conversation = new Promise<any>((resolve) => socket.once("conversation.updated", resolve));
-      const messageCreated = new Promise<any>((resolve) => socket.once("message.created", resolve));
+      const conversation = new Promise<any>((resolve) => socket.once("message.update", resolve));
+      const messageCreated = new Promise<any>((resolve) => socket.once("message.sent", resolve));
       const message = { id: "M-test", lineUserId: "U-test", body: "hello", direction: "received", createdAt: new Date() } as Message;
       const user = { id: "U-test", name: "Test", lastMessageId: message.id, updatedAt: new Date() } as LineUser;
       gateway.publishMessage(user, message, message);
-      assert.equal((await conversation).contact.lastMessageId, "M-test");
-      assert.equal((await messageCreated).message.id, "M-test");
+      assert.equal((await conversation).conversation.lastMessageId, "M-test");
+      const received = (await messageCreated).message;
+      assert.equal(received.id, "M-test");
+      assert.equal(received.createdAt, message.createdAt.toISOString());
       socket.disconnect();
     }
   } finally {
@@ -72,7 +74,7 @@ test("unfollow notifies only after commit and does not notify on rollback", asyn
     },
   } as unknown as Sequelize;
   const gateway = {
-    notify() {
+    publishUserUpdated() {
       assert.ok(committed);
       emitted++;
     },

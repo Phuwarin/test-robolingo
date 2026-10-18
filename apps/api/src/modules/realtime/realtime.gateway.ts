@@ -20,30 +20,29 @@ export class RealtimeGateway {
   publishConversation(user: LineUser, latest: Message | null, readReceipt?: { messageIds: string[]; readAt: string }) {
     const event = {
       lineUserId: user.id,
-      contact: {
+      conversation: {
         id: user.id,
         name: user.name,
         pictureUrl: user.pictureUrl,
         friendStatus: user.friendStatus,
         lastMessageId: user.lastMessageId,
         unreadCount: user.unreadCount,
-        lastMessageAt: latest?.createdAt || null,
-        preview: latest?.body || "",
+        lastMessage: latest ? { body: latest.body, createdAt: latest.createdAt } : null,
         updatedAt: user.updatedAt,
       },
       readReceipt,
     };
-    this.server?.emit("conversation.updated", event);
+    this.server?.emit("message.update", event);
     return event;
   }
 
   publishMessage(user: LineUser, message: Message, latest: Message | null) {
     this.publishConversation(user, latest);
-    this.server?.emit("message.created", {
+    this.server?.emit("message.sent", {
       lineUserId: user.id,
       message: {
         id: message.id,
-        contactId: user.id,
+        lineUserId: user.id,
         direction: message.direction,
         body: message.body,
         createdAt: message.createdAt,
@@ -52,7 +51,7 @@ export class RealtimeGateway {
     });
   }
 
-  notify(lineUserId: string, reason: "message" | "user") {
-    this.server?.emit("workspace.updated", { lineUserId, reason });
+  publishUserUpdated(lineUserId: string) {
+    this.server?.emit("workspace.updated", { lineUserId, reason: "user" });
   }
 }

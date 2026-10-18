@@ -1,9 +1,15 @@
-import { Body, Controller, Post, HttpCode, Inject, Req, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException, HttpException } from "@nestjs/common";
+import { Body, Controller, Post, Get, Query, Header, HttpCode, Inject, Req, ForbiddenException, BadRequestException, NotFoundException, BadGatewayException, HttpException } from "@nestjs/common";
 import type { Request } from "express";
 import { MessagesService } from "./messages.service.js";
 @Controller("messages")
 export class MessagesController {
   constructor(@Inject(MessagesService) private readonly service: MessagesService) {}
+  @Get()
+  @Header("Cache-Control", "no-store")
+  async list(@Query("lineUserId") lineUserId?: string) {
+    if (typeof lineUserId !== "string" || !lineUserId.trim() || lineUserId.length > 200) throw new BadRequestException("Provide lineUserId");
+    return this.service.listMessages(lineUserId);
+  }
   @Post()
   @HttpCode(200)
   async send(@Req() request: Request, @Body() data: { to?: unknown; text?: unknown }) {

@@ -13,6 +13,16 @@ export class MessagesService {
     @InjectConnection() private readonly database: Sequelize,
     @Inject(RealtimeGateway) private readonly realtime: RealtimeGateway,
   ) {}
+  async listMessages(lineUserId: string) {
+    return this.messages.findAll({
+      where: { lineUserId },
+      order: [
+        ["createdAt", "ASC"],
+        ["id", "ASC"],
+      ],
+      raw: true,
+    });
+  }
   async sendMessage(data: { to: string; text: string }) {
     const recipient = await this.users.findOne({
       where: { id: data.to },

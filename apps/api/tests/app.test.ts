@@ -21,11 +21,11 @@ test("Nest endpoints work without an auth module", async () => {
   assert.equal((await fetch(`${base}/api/login`, { method: "POST" })).status, 404);
   const service = app.get(ConversationsService);
   const original = service.listConversations;
-  service.listConversations = async () => ({ contacts: [], messages: [] });
+  service.listConversations = async () => ({ conversations: [] });
   try {
     const conversations = await fetch(`${base}/api/conversations`);
     assert.equal(conversations.status, 200);
-    assert.deepEqual(await conversations.json(), { contacts: [], messages: [] });
+    assert.deepEqual(await conversations.json(), { conversations: [] });
   } finally {
     service.listConversations = original;
   }
@@ -141,14 +141,34 @@ test("read endpoint rejects invalid or missing message IDs", async () => {
   }
 });
 
+test("message history requires a user and forwards only that user ID", async () => {
+  assert.equal((await fetch(`${base}/api/messages`)).status, 400);
+  const service = app.get(MessagesService);
+  const original = service.listMessages;
+  const calls: string[] = [];
+  service.listMessages = async (lineUserId) => {
+    calls.push(lineUserId);
+    return [];
+  };
+  try {
+    const response = await fetch(`${base}/api/messages?lineUserId=internal-user-id`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), []);
+    assert.deepEqual(calls, ["internal-user-id"]);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+  } finally {
+    service.listMessages = original;
+  }
+});
+
 test("sidebar unread endpoint returns the total independently of pagination", async () => {
   const service = app.get(ConversationsService);
   const original = service.getUnreadCount;
-  service.getUnreadCount = async () => ({ unreadCount: 12 });
+  service.getUnreadCount = async () => ({ unreadCount: 12, users: [] });
   try {
     const response = await fetch(`${base}/api/conversations/unread-count`);
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { unreadCount: 12 });
+    assert.deepEqual(await response.json(), { unreadCount: 12, users: [] });
     assert.equal(response.headers.get("cache-control"), "no-store");
   } finally {
     service.getUnreadCount = original;

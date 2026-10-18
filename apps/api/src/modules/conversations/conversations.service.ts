@@ -13,27 +13,21 @@ export class ConversationsService {
     @Inject(RealtimeGateway) private readonly realtime: RealtimeGateway,
   ) {}
   async listConversations() {
-    const users = await this.users.findAll({
-      order: [["updatedAt", "DESC"]],
-      raw: true,
-    });
-    const rows = await this.messages.findAll({
+    const conversations = await this.users.findAll({
+      include: [{ model: Message, as: "lastMessage", attributes: ["body", "createdAt"], required: false }],
       order: [
-        ["createdAt", "ASC"],
+        [{ model: Message, as: "lastMessage" }, "createdAt", "DESC NULLS LAST"],
         ["id", "ASC"],
       ],
-      raw: true,
     });
-    const previews = new Map<string, Message>();
-    for (const message of rows) previews.set(message.lineUserId, message);
-    return {
-      contacts: users.map((user) => ({ ...user, preview: previews.get(user.id)?.body || "", lastMessageAt: previews.get(user.id)?.createdAt || null })),
-      messages: rows.map((message) => ({ ...message, contactId: message.lineUserId })),
-    };
+    return { conversations };
   }
   async getUnreadCount() {
-    const unreadCount = await this.users.sum("unreadCount");
-    return { unreadCount: Number(unreadCount) || 0 };
+    const users = await this.users.findAll({
+      attributes: ["id", "unreadCount", "updatedAt"],
+      raw: true,
+    });
+    return { unreadCount: users.reduce((total, user) => total + user.unreadCount, 0), users };
   }
   async markRead(lineUserId: string, messageIds: string[]) {
     const readAt = new Date();

@@ -10,10 +10,11 @@
 - Messages
 
   - [ ] POST /api/messages
+  - [ ] GET /api/messages?lineUserId=:lineUserId
 
 - Conversations
 
-  - [ ] GET /api/conversations
+  - [x] GET /api/conversations
 
 - Line Users
 
@@ -25,4 +26,4 @@
 - Unread
   - [ ] GET /api/conversations/unread-count
   - [ ] POST /api/conversations/:lineUserId/read
-  - [ ] unreadCount / readAt / conversation.updated
+  - [ ] unreadCount / readAt / message.update

@@ -40,7 +40,7 @@ function setup(existing = true) {
   };
   return {
     record,
-    service: new WebhookService(users as unknown as typeof LineUser, {} as typeof Message, database as unknown as Sequelize, { notify() {} } as RealtimeGateway),
+    service: new WebhookService(users as unknown as typeof LineUser, {} as typeof Message, database as unknown as Sequelize, { publishUserUpdated() {} } as RealtimeGateway),
     updates: () => updates,
     created: () => created,
   };

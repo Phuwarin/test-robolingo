@@ -1,4 +1,5 @@
-import { CreatedAt, UpdatedAt, Table, Column, Model, DataType, PrimaryKey, HasMany } from "sequelize-typescript";
+import { CreatedAt, UpdatedAt, Table, Column, Model, DataType, PrimaryKey, HasMany, BelongsTo } from "sequelize-typescript";
+import type { NonAttribute } from "sequelize";
 import { Message } from "./message.model.js";
 @Table({
   tableName: "line_users",
@@ -43,4 +44,7 @@ export class LineUser extends Model {
   // Relations
   @HasMany(() => Message)
   declare messages: Message[];
+
+  @BelongsTo(() => Message, { foreignKey: "lastMessageId", constraints: false })
+  declare lastMessage: NonAttribute<Message | null>;
 }
