@@ -13,6 +13,9 @@ export const metadata: Metadata = {
 };
 
 const stack = ["Next.js", "TypeScript", "NestJS", "PostgreSQL", "Sequelize", "Socket.IO", "React Query", "shadcn/ui", "Bun"];
+const lineOaId = process.env.NEXT_PUBLIC_LINE_OA_ID || "@414plwuv";
+const lineOaUrl = process.env.NEXT_PUBLIC_LINE_OA_URL || `https://line.me/R/ti/p/${encodeURIComponent(lineOaId)}`;
+const lineOaQr = process.env.NEXT_PUBLIC_LINE_OA_QR || "/test-bot-qr.png";
 const endpoints = [
   ["POST /api/webhook", "รับ event follow, unfollow และ message จาก LINE พร้อมตรวจ signature"],
   ["GET /api/line-users", "รายชื่อผู้ใช้ ค้นหาและกรองสถานะ ไม่มี pagination ผู้ใช้ที่บล็อก OA อยู่ท้ายรายการ"],
@@ -75,9 +78,9 @@ export default function ProjectPage() {
         <ol className={styles.steps}>
           <li>
             <strong>เพิ่มเพื่อน Test Bot</strong>
-            <p>ค้นหา @414plwuv บน LINE หรือสแกน QR ด้านล่าง</p>
-            <a href="https://line.me/R/ti/p/%40414plwuv" target="_blank" rel="noreferrer">
-              <Image src="/test-bot-qr.png" alt="QR เพิ่มเพื่อน Test Bot @414plwuv" width={180} height={180} priority unoptimized />
+            <p>ค้นหา {lineOaId} บน LINE หรือสแกน QR ด้านล่าง</p>
+            <a href={lineOaUrl} target="_blank" rel="noreferrer">
+              <Image src={lineOaQr} alt={`QR เพิ่มเพื่อน Test Bot ${lineOaId}`} width={180} height={180} priority unoptimized />
             </a>
           </li>
           <li>

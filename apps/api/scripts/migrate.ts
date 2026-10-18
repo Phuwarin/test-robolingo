@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
 import { QueryTypes } from "sequelize";
-if (!process.env.DB_PASSWORD) throw new Error("Set DB_PASSWORD in apps/api/.env before running migrations");
+if (!process.env.DB_PASSWORD) throw new Error("Set DB_PASSWORD in apps/api/.env.local or production environment before running migrations");
 const database = new Sequelize({
   dialect: "postgres",
   host: process.env.DB_HOST || "127.0.0.1",

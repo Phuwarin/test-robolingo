@@ -12,8 +12,8 @@
     "format": "bun --bun prettier --write .",
     "format:check": "bun --bun prettier --check .",
     "db:migrate": "bun scripts/migrate.ts",
-    "db:up": "docker compose -p test-robolingo up -d --wait",
-    "db:down": "docker compose -p test-robolingo down"
+    "db:up": "docker compose --env-file .env.local -p test-robolingo up -d --wait",
+    "db:down": "docker compose --env-file .env.local -p test-robolingo down"
   },
   "dependencies": {
     "@nestjs/common": "^11",

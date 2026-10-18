@@ -19,7 +19,7 @@ Web uses `/api/*` through a Next.js reverse proxy. The actual handlers, LINE int
 
 ## Configuration
 
-Copy each app's `.env.example` to `.env.local` (web) or `.env` (API). LINE credentials and DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD belong only to the API. Run `bun run db:migrate` inside apps/api before live use. This creates the new schema or migrates existing contacts to line_users and messages.contact_id to line_user_id. Authentication is currently removed for this development phase; conversation and messaging endpoints do not require a login.
+Copy each app's `.env.example` to `.env.local` in both apps. LINE credentials and DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD belong only to the API. Run `bun run db:migrate` inside apps/api before live use. This creates the new schema or migrates existing contacts to line_users and messages.contact_id to line_user_id. Authentication is currently removed for this development phase; conversation and messaging endpoints do not require a login.
 
 LINE webhook: public HTTPS API URL followed by `/api/webhook`. Verify and enable webhooks and redelivery in LINE Developers. Local testing requires an HTTPS tunnel. Add the OA as a friend using LINE and send a message to test incoming messages. Non-text messages show a type placeholder. Outgoing messages support text only. Groups are ignored.
 
@@ -47,7 +47,7 @@ The API uses @nestjs/sequelize, sequelize-typescript and the pg PostgreSQL drive
 
 ## Local PostgreSQL
 
-From apps/api run `bun run db:up` to start PostgreSQL 18 on 127.0.0.1:5433, database/user line_desk, then `bun run db:migrate`. Password and DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD are stored in the ignored API .env. The compose project is test-robolingo with a dedicated postgres_data volume. `bun run db:down` stops the container and keeps its data. SequelizeModule.forRootAsync is configured in AppModule; feature modules register their models with forFeature.
+From apps/api run `bun run db:up` to start PostgreSQL 18 on 127.0.0.1:5433, database/user line_desk, then `bun run db:migrate`. Password and DB_HOST / DB_PORT / DB_NAME / DB_USER / DB_PASSWORD are stored in the ignored API .env.local. The compose project is test-robolingo with a dedicated postgres_data volume. `bun run db:down` stops the container and keeps its data. SequelizeModule.forRootAsync is configured in AppModule; feature modules register their models with forFeature.
 
 ## Realtime
 
