@@ -21,7 +21,7 @@ type Props = {
 };
 export function ConversationList({ conversations, selected, query, refreshing, connected, mode, onQueryChange, onSelect, onRefresh, onDemo }: Props) {
   const filtered = conversations.filter((c) => {
-    return (c.name + c.id + (c.lastMessage?.body || "")).toLowerCase().includes(query.toLowerCase());
+    return c.name.toLowerCase().includes(query.trim().toLowerCase());
   });
   return (
     <aside className="conversation-list" aria-label="รายชื่อบทสนทนา">
@@ -43,7 +43,7 @@ export function ConversationList({ conversations, selected, query, refreshing, c
       </div>
       <div className="list-search">
         <Search size={17} />
-        <Input aria-label="ค้นหาบทสนทนา" placeholder="ค้นหาชื่อหรือข้อความ" value={query} onChange={(e) => onQueryChange(e.target.value)} />
+        <Input aria-label="ค้นหาชื่อผู้ใช้" placeholder="ค้นหาชื่อผู้ใช้" value={query} onChange={(e) => onQueryChange(e.target.value)} />
         <Button variant="ghost" size="icon" title="รีเฟรช" aria-label="รีเฟรช" disabled={refreshing} onClick={onRefresh}>
           <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
         </Button>
