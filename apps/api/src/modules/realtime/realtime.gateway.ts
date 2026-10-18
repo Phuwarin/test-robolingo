@@ -3,7 +3,7 @@ import { WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import type { Server } from "socket.io";
 
 export function allowedSocketOrigin(origin: string | undefined) {
-  const origins = [process.env.WEB_ORIGIN || "http://localhost:3099"];
+  const origins = [process.env.WEB_ORIGIN || "http://localhost:3099", "https://test-web.9phuwarin.dev"];
   if (process.env.NODE_ENV !== "production") origins.push("http://localhost:3099");
   return !!origin && origins.includes(origin);
 }

@@ -4,6 +4,8 @@
 @theme inline {
   --color-background: #fff;
   --color-foreground: #252b36;
+  --color-popover: #fff;
+  --color-popover-foreground: #252b36;
   --color-primary: #06a85d;
   --color-primary-foreground: #fff;
   --color-secondary: #edf7f1;

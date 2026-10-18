@@ -4,66 +4,66 @@
 
 ## App
 
-- [ ] `app.module.ts` — `AppModule`
+- [X] `app.module.ts` — `AppModule`
 
 ## Webhook
 
-- [x] `webhook.module.ts` — `WebhookModule`
+- [X] `webhook.module.ts` — `WebhookModule`
 
 - Controller: `webhook.controller.ts` — `WebhookController`
-  - [x] `receive()` — POST /api/webhook
-    - [x] follow
-    - [x] unfollow
-    - [x] message
+  - [X] `receive()` — POST /api/webhook
+    - [X] follow
+    - [X] unfollow
+    - [X] message
 - Service: `webhook.service.ts` — `WebhookService`
-  - [x] `processEvents()`
-  - [x] `handleFollow()`
-  - [x] `handleUnfollow()`
-  - [x] `handleMessage()`
+  - [X] `processEvents()`
+  - [X] `handleFollow()`
+  - [X] `handleUnfollow()`
+  - [X] `handleMessage()`
 
 ## Messages
 
-- [x] `messages.module.ts` — `MessagesModule`
+- [X] `messages.module.ts` — `MessagesModule`
 
 - Controller: `messages.controller.ts` — `MessagesController`
-  - [x] `list()` — GET /api/messages?lineUserId=:lineUserId
-  - [x] `send()` — POST /api/messages
+  - [X] `list()` — GET /api/messages?lineUserId=:lineUserId
+  - [X] `send()` — POST /api/messages
 - Service: `messages.service.ts` — `MessagesService`
-  - [x] `listMessages()`
-  - [x] `sendMessage()`
+  - [X] `listMessages()`
+  - [X] `sendMessage()`
 
 ## Conversations
 
-- [x] `conversations.module.ts` — `ConversationsModule`
+- [X] `conversations.module.ts` — `ConversationsModule`
 
 - Controller: `conversations.controller.ts` — `ConversationsController`
-  - [x] `list()` — GET /api/conversations
-  - [x] `markRead()` — POST /api/conversations/:lineUserId/read
+  - [X] `list()` — GET /api/conversations
+  - [X] `markRead()` — POST /api/conversations/:lineUserId/read
 - Service: `conversations.service.ts` — `ConversationsService`
-  - [x] `listConversations()`
-  - [x] `markRead()`
+  - [X] `listConversations()`
+  - [X] `markRead()`
 
 ## Line Users
 
-- [x] `line-users.module.ts` — `LineUsersModule`
+- [X] `line-users.module.ts` — `LineUsersModule`
 
 - Controller: `line-users.controller.ts` — `LineUsersController`
-  - [x] `list()` — GET /api/line-users
+  - [X] `list()` — GET /api/line-users
 - Service: `line-users.service.ts` — `LineUsersService`
-  - [ ] `list()`
+  - [X] `list()`
 
 ## Realtime
 
-- [ ] `realtime.module.ts` — `RealtimeModule`
+- [X] `realtime.module.ts` — `RealtimeModule`
 
 - Gateway: `realtime.gateway.ts` — `RealtimeGateway` (ไม่มี controller หรือ service แยก)
-  - [ ] `allowedSocketOrigin()`
-  - [ ] `publishConversation()` — message.update
-  - [ ] `publishMessage()` — message.update แล้ว message.sent
-  - [ ] `publishUserUpdated()` — workspace.updated
+  - [X] `allowedSocketOrigin()`
+  - [X] `publishConversation()` — message.update
+  - [X] `publishMessage()` — message.update แล้ว message.sent
+  - [X] `publishUserUpdated()` — workspace.updated
 
 ## Unread
 
-- [ ] `LineUser.unreadCount`
-- [ ] `Message.readAt`
-- [ ] `message.update` — อัปเดต unread และ readReceipt
+- [X] `LineUser.unreadCount`
+- [X] `Message.readAt`
+- [X] `message.update` — อัปเดต unread และ readReceipt

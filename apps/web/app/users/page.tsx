@@ -92,7 +92,7 @@ export default function UsersPage() {
             <SelectTrigger aria-label="สถานะผู้ใช้">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ backgroundColor: "#fff", color: "#252b36" }}>
               <SelectItem value="all">ทุกสถานะ</SelectItem>
               <SelectItem value="follow">เพิ่มเพื่อนแล้ว</SelectItem>
               <SelectItem value="unfollow">บล็อก OA</SelectItem>
