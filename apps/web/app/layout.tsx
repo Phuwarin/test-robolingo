@@ -1,3 +1,4 @@
+import { QueryProvider } from "@/providers/query-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 import { WorkspaceSidebar } from "@/components/workspace-sidebar";
 import "./globals.css";
@@ -6,10 +7,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="th">
       <body>
-        <RealtimeProvider>
-          <WorkspaceSidebar />
-          <div className="workspace-content">{children}</div>
-        </RealtimeProvider>
+        <QueryProvider>
+          <RealtimeProvider>
+            <WorkspaceSidebar />
+            <div className="workspace-content">{children}</div>
+          </RealtimeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
