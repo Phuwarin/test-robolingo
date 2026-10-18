@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import styles from "../page.module.css";
 
-const stack = ["Next.js", "TypeScript", "NestJS", "PostgreSQL", "Sequelize", "Socket.IO", "React Query", "shadcn/ui", "Bun"];
+const stack = ["Next.js", "TypeScript", "NestJS", "PostgreSQL", "Sequelize", "Socket.IO", "React Query", "Zustand", "shadcn/ui", "Bun"];
 
 export function ArchitectureSection() {
   return (

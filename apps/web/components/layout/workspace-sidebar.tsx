@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { usersQuery } from "@/lib/api-queries";
-import { useRealtimeConnection } from "@/providers/realtime-provider";
+import { useRealtimeStore } from "@/stores/realtime-store";
 export function WorkspaceSidebar() {
   const path = usePathname();
   const { data } = useQuery(usersQuery());
-  const { readingRoomId } = useRealtimeConnection();
+  const readingRoomId = useRealtimeStore((state) => state.readingRoomId);
   const unreadCount =
     data?.users.reduce((total, user) => {
       return total + (user.id === readingRoomId ? 0 : user.unreadCount);

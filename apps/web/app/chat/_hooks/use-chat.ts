@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRealtimeConnection } from "@/providers/realtime-provider";
+import { useRealtimeStore } from "@/stores/realtime-store";
 import { conversationKey, conversationsQuery, messageKey, messagesQuery, fetchJson } from "@/lib/api-queries";
 import { updateConversationCache, refreshWorkspace } from "@/lib/realtime-cache";
 import { mergeConversation, type Conversation, type ChatMessage as Message } from "@/lib/chat-state";
@@ -19,7 +19,8 @@ export function useChat() {
   const [viewActive, setViewActive] = useState(false);
   const readInFlight = useRef(new Set<string>());
   const initialSelectionHandled = useRef(false);
-  const { connected, setReadingRoomId } = useRealtimeConnection();
+  const connected = useRealtimeStore((state) => state.connected);
+  const setReadingRoomId = useRealtimeStore((state) => state.setReadingRoomId);
   const list = useQuery({ ...conversationsQuery(), enabled: mode === "live" });
   const history = useQuery({ ...messagesQuery(selected), enabled: mode === "live" && !!selected });
   const storedConversations = mode === "demo" ? demoConversations : list.data || [];
