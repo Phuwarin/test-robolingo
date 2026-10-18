@@ -34,11 +34,11 @@ export function useRealtime(onRefresh: () => void, enabled = true, handlers: Rea
     socket.on("disconnect", () => setConnected(false));
     socket.on("connect_error", () => setConnected(false));
     socket.on("workspace.updated", refresh);
-    socket.on("conversation.updated", (event: ConversationUpdated) => {
+    socket.on("message.update", (event: ConversationUpdated) => {
       if (eventHandlers.current.onConversationUpdated) eventHandlers.current.onConversationUpdated(event);
       else refresh();
     });
-    socket.on("message.created", (event: MessageCreated) => eventHandlers.current.onMessageCreated?.(event));
+    socket.on("message.sent", (event: MessageCreated) => eventHandlers.current.onMessageCreated?.(event));
     return () => {
       clearTimeout(timer);
       socket.disconnect();

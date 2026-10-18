@@ -19,7 +19,24 @@ export default function UsersPage() {
     [busy, setBusy] = useState(true),
     [error, setError] = useState(""),
     [version, setVersion] = useState(0);
-  useRealtime(() => setVersion((value) => value + 1));
+  useRealtime(() => setVersion((value) => value + 1), true, {
+    onConversationUpdated: ({ conversation }) => {
+      if (!conversation) return;
+      setUsers((current) =>
+        current.map((user) =>
+          user.id === conversation.id
+            ? {
+                ...user,
+                name: conversation.name,
+                pictureUrl: conversation.pictureUrl ?? user.pictureUrl,
+                friendStatus: conversation.friendStatus ?? user.friendStatus,
+                lastMessageId: conversation.lastMessageId ?? user.lastMessageId,
+              }
+            : user,
+        ),
+      );
+    },
+  });
   useEffect(() => {
     const controller = new AbortController();
     setBusy(true);
