@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UsersRound, MessageCircle, MessageSquareText } from "lucide-react";
+import { UsersRound, MessageCircle, House } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
@@ -12,8 +12,8 @@ export function WorkspaceSidebar() {
   const unreadCount = data?.users.reduce((total, user) => total + user.unreadCount, 0) || 0;
   return (
     <aside className="workspace-sidebar" aria-label="เมนูหลัก">
-      <Link className="workspace-logo" href="/" aria-label="LINE Desk">
-        <MessageSquareText size={23} />
+      <Link className="workspace-logo" href="/" title="หน้าแรก" aria-label="หน้าแรก" aria-current={path === "/" ? "page" : undefined}>
+        <House size={23} />
       </Link>
       <Button asChild variant="ghost" size="icon" className={path === "/users" ? "rail-link active" : "rail-link"}>
         <Link href="/users" title="Users" aria-label="Users" aria-current={path === "/users" ? "page" : undefined}>

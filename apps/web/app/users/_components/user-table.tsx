@@ -40,7 +40,6 @@ export function UserTable({ users, busy, error, query, status }: Props) {
                 </Avatar>
                 <div>
                   <strong>{user.name}</strong>
-                  <small>{user.lineUserId}</small>
                 </div>
               </div>
             </TableCell>
