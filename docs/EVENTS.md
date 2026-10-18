@@ -54,10 +54,10 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 | จุดรับบนเว็บ | พฤติกรรมปัจจุบัน                                                                                      |
 | ------------ | ----------------------------------------------------------------------------------------------------- |
 | หน้าแชท      | ใช้ `conversation` อัปเดตแถวนั้นโดยตรง เรียงตามเวลาข้อความล่าสุด และใช้ `readReceipt` อัปเดตสถานะอ่าน |
-| หน้า Users   | อัปเดตแถว User ที่อยู่ในหน้าปัจจุบันจาก `conversation` โดยไม่เรียก API ซ้ำ                            |
+| หน้า Users   | อัปเดตแถว User ที่อยู่ในรายการปัจจุบันจาก `conversation` โดยไม่เรียก API ซ้ำ                          |
 | Sidebar      | แทนค่า unread ของ User คนนั้นใน state แล้วรวมยอดใหม่ โดยไม่เรียก API ซ้ำ                              |
 
-ทั้งหน้าแชท Users และ sidebar ใช้ payload โดยตรง สำหรับ Users จะคงสมาชิกของหน้าปัจจุบันไว้ การค้นหา เปลี่ยนหน้า รีเฟรช และ reconnect จึงโหลดรายการจาก API ใหม่ ส่วน sidebar โหลด `users: [{ id, unreadCount, updatedAt }]` จาก `GET /api/conversations/unread-count` ตอนเริ่ม/reconnect แล้วแทนยอดรายคนจาก Socket ไม่บวกสะสม จึงไม่เพิ่มซ้ำเมื่อรับ event เดิม
+ทั้งหน้าแชท Users และ sidebar ใช้ payload โดยตรง สำหรับ Users จะคงสมาชิกของรายการปัจจุบันไว้ การค้นหา เปลี่ยนตัวกรอง รีเฟรช และ reconnect จึงโหลดรายการจาก API ใหม่ ส่วน sidebar โหลด `users: [{ id, unreadCount, updatedAt }]` จาก `GET /api/conversations/unread-count` ตอนเริ่ม/reconnect แล้วแทนยอดรายคนจาก Socket ไม่บวกสะสม จึงไม่เพิ่มซ้ำเมื่อรับ event เดิม
 
 ### `message.sent`
 
@@ -119,3 +119,5 @@ Socket.IO ใช้ WebSocket ที่พอร์ตเดียวกับ A
 - `GET /api/messages?lineUserId=<User UUID>` คืน array ข้อความเฉพาะห้องที่เปิด เรียง `createdAt ASC, id ASC` โดย `Message.lineUserId` อ้างถึง UUID ภายใน
 - เว็บโหลดประวัติเมื่อเลือกห้อง และโหลดใหม่เมื่อ refresh หรือ reconnect ส่วน `message.sent` เพิ่มข้อความเฉพาะห้องที่เปิดจาก payload ได้ทันที
 - เวลาสลับห้อง เว็บยกเลิก request ประวัติของห้องก่อนหน้าเพื่อไม่ให้ผลลัพธ์เก่ารบกวนห้องใหม่
+
+หน้า Users และ `GET /api/line-users` ไม่มี pagination คืนผู้ใช้ทั้งหมดที่ตรงกับคำค้นหาและสถานะ ไม่มี `page` หรือ `limit`
