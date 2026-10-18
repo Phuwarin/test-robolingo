@@ -7,8 +7,11 @@ import { Message } from "./message.model.js";
 })
 export class LineUser extends Model {
   @PrimaryKey
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, defaultValue: DataType.UUIDV4 })
   declare id: string;
+
+  @Column({ type: DataType.TEXT, allowNull: false, unique: true })
+  declare lineUserId: string;
 
   @Column({ type: DataType.TEXT, allowNull: false })
   declare name: string;

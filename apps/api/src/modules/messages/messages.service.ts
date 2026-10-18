@@ -27,7 +27,7 @@ export class MessagesService {
 
     const response = await line("message/push", {
       method: "POST",
-      body: JSON.stringify({ to: data.to, messages: [{ type: "text", text: data.text.trim() }] }),
+      body: JSON.stringify({ to: recipient.lineUserId, messages: [{ type: "text", text: data.text.trim() }] }),
     });
     const result = (await response.json()) as { sentMessages?: Array<{ id: string }> };
     const messageId = randomUUID();

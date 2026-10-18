@@ -9,10 +9,10 @@ import { LineUser } from "./line-user.model.js";
 })
 export class Message extends Model {
   @PrimaryKey
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, defaultValue: DataType.UUIDV4 })
   declare id: string;
 
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, unique: true })
   declare lineMessageId: string | null;
 
   @ForeignKey(() => LineUser)

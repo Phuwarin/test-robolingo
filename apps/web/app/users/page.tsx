@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-type User = { id: string; name: string; pictureUrl: string | null; friendStatus: string; friendStatusAt: string | null; createdAt: string; lastMessageId: string | null };
+type User = { id: string; lineUserId: string; name: string; pictureUrl: string | null; friendStatus: string; friendStatusAt: string | null; createdAt: string; lastMessageId: string | null };
 const statusLabels: Record<string, string> = { follow: "เพิ่มเพื่อนแล้ว", unfollow: "บล็อก OA", unknown: "ไม่ทราบสถานะ" };
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]),
@@ -113,7 +113,7 @@ export default function UsersPage() {
                     </Avatar>
                     <div>
                       <strong>{user.name}</strong>
-                      <small>{user.id}</small>
+                      <small>{user.lineUserId}</small>
                     </div>
                   </div>
                 </TableCell>

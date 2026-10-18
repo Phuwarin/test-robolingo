@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS line_users (
  id text PRIMARY KEY,
+ line_user_id text NOT NULL UNIQUE,
  name text NOT NULL,
  unread_count integer NOT NULL DEFAULT 0,
  last_message_id text,
@@ -11,7 +12,7 @@ CREATE TABLE IF NOT EXISTS line_users (
 );
 CREATE TABLE IF NOT EXISTS messages (
  id text PRIMARY KEY,
- line_message_id text,
+ line_message_id text UNIQUE,
  read_at timestamptz,
  line_user_id text NOT NULL REFERENCES line_users(id),
  direction text NOT NULL CHECK (direction IN ('received','botSent')),

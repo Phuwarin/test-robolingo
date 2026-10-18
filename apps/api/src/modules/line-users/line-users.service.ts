@@ -8,7 +8,7 @@ export class LineUsersService {
   async list(query: string, status: string, page: number, limit: number) {
     const where: WhereOptions = {
       ...(status ? { friendStatus: status } : {}),
-      ...(query ? { [Op.or]: [{ name: { [Op.iLike]: `%${query}%` } }, { id: { [Op.iLike]: `%${query}%` } }] } : {}),
+      ...(query ? { [Op.or]: [{ name: { [Op.iLike]: `%${query}%` } }, { lineUserId: { [Op.iLike]: `%${query}%` } }] } : {}),
     };
     const { rows, count } = await this.users.findAndCountAll({
       where,
