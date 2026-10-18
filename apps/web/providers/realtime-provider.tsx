@@ -7,12 +7,15 @@ import { io, type Socket } from "socket.io-client";
 type RealtimeContextValue = {
   socket: Socket | null;
   connected: boolean;
+  readingRoomId: string;
+  setReadingRoomId: (id: string) => void;
 };
 const RealtimeContext = createContext<RealtimeContextValue | null>(null);
 export function RealtimeProvider({ children }: { children: ReactNode }) {
   const client = useQueryClient();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [readingRoomId, setReadingRoomId] = useState("");
   useEffect(() => {
     const connection = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4099", { transports: ["websocket"], autoConnect: false });
     connection.on("connect", () => {
@@ -31,7 +34,7 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
       connection.removeAllListeners();
     };
   }, [client]);
-  const value = useMemo(() => ({ socket, connected }), [socket, connected]);
+  const value = useMemo(() => ({ socket, connected, readingRoomId, setReadingRoomId }), [socket, connected, readingRoomId]);
   return <RealtimeContext.Provider value={value}>{children}</RealtimeContext.Provider>;
 }
 export function useRealtimeConnection() {

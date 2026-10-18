@@ -19,14 +19,24 @@ export function useChat() {
   const [viewActive, setViewActive] = useState(false);
   const readInFlight = useRef(new Set<string>());
   const initialSelectionHandled = useRef(false);
-  const { connected } = useRealtimeConnection();
+  const { connected, setReadingRoomId } = useRealtimeConnection();
   const list = useQuery({ ...conversationsQuery(), enabled: mode === "live" });
   const history = useQuery({ ...messagesQuery(selected), enabled: mode === "live" && !!selected });
-  const conversations = mode === "demo" ? demoConversations : list.data || [];
+  const storedConversations = mode === "demo" ? demoConversations : list.data || [];
   const messages = mode === "demo" ? demoMessages : history.data || [];
-  const conversation = conversations.find((item) => item.id === selected);
+  const conversation = storedConversations.find((item) => item.id === selected);
   const isBlocked = conversation?.friendStatus === "unfollow";
   const loadingHistory = mode === "live" && !!selected && history.isPending;
+  const readingRoomId = mode === "live" && viewActive && !loadingHistory && !history.error && !error ? selected : "";
+  // Hide the transient unread badge while this room is being read; keep server counts in the cache.
+  const conversations = storedConversations.map((item) => {
+    return item.id === readingRoomId ? { ...item, unreadCount: 0 } : item;
+  });
+
+  useEffect(() => {
+    setReadingRoomId(readingRoomId);
+    return () => setReadingRoomId("");
+  }, [readingRoomId, setReadingRoomId]);
 
   useEffect(() => {
     const update = () => setViewActive(document.visibilityState === "visible" && document.hasFocus());

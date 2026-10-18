@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { usersQuery } from "@/lib/api-queries";
+import { useRealtimeConnection } from "@/providers/realtime-provider";
 export function WorkspaceSidebar() {
   const path = usePathname();
   const { data } = useQuery(usersQuery());
-  const unreadCount = data?.users.reduce((total, user) => total + user.unreadCount, 0) || 0;
+  const { readingRoomId } = useRealtimeConnection();
+  const unreadCount =
+    data?.users.reduce((total, user) => {
+      return total + (user.id === readingRoomId ? 0 : user.unreadCount);
+    }, 0) || 0;
   return (
     <aside className="workspace-sidebar" aria-label="เมนูหลัก">
       <Link className="workspace-logo" href="/" title="หน้าแรก" aria-label="หน้าแรก" aria-current={path === "/" ? "page" : undefined}>
