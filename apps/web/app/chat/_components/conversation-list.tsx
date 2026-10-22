@@ -53,6 +53,7 @@ export function ConversationList({ conversations, selected, query, refreshing, c
       <div className="contacts">
         {filtered.map((c) => {
           const lastMessageAt = c.lastMessageTime;
+          const displayDate = lastMessageAt ? new Date(lastMessageAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" }) : "";
           const displayTime = lastMessageAt ? new Date(lastMessageAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) : "";
           return (
             <Button key={c.id} variant="ghost" className={`contact ${c.id === selected ? "active" : ""}`} onClick={() => onSelect(c.id)}>
@@ -68,7 +69,8 @@ export function ConversationList({ conversations, selected, query, refreshing, c
               </span>
               <span className={styles.metadata}>
                 <time className={styles.time} dateTime={lastMessageAt || undefined}>
-                  {displayTime || "\u00a0"}
+                  <span>{displayDate || "\u00a0"}</span>
+                  <span>{displayTime || "\u00a0"}</span>
                 </time>
                 <span className={styles.unread}>
                   {!!c.unreadCount && (
