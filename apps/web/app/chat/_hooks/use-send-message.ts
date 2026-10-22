@@ -4,14 +4,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { conversationKey, messageKey, fetchJson } from "@/lib/api-queries";
 
 type Options = {
-  mode: "live" | "demo";
   selected: string;
   connected: boolean;
   isBlocked: boolean;
   setError: (error: string) => void;
-  sendDemoMessage: (selected: string, text: string) => void;
 };
-export function useSendMessage({ mode, selected, connected, isBlocked, setError, sendDemoMessage }: Options) {
+export function useSendMessage({ selected, connected, isBlocked, setError }: Options) {
   const client = useQueryClient();
   const [draft, setDraft] = useState("");
   const sendMutation = useMutation({
@@ -26,13 +24,9 @@ export function useSendMessage({ mode, selected, connected, isBlocked, setError,
     setError("");
     const data = { to: selected, text: draft.trim() };
     try {
-      if (mode === "demo") {
-        sendDemoMessage(selected, data.text);
-      } else {
-        await sendMutation.mutateAsync(data);
-        if (!connected) {
-          await Promise.all([client.invalidateQueries({ queryKey: conversationKey }), client.invalidateQueries({ queryKey: messageKey(data.to) })]);
-        }
+      await sendMutation.mutateAsync(data);
+      if (!connected) {
+        await Promise.all([client.invalidateQueries({ queryKey: conversationKey }), client.invalidateQueries({ queryKey: messageKey(data.to) })]);
       }
       setDraft("");
     } catch (failure) {

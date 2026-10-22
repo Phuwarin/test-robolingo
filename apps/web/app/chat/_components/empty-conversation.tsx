@@ -1,7 +1,6 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
-export function EmptyConversation({ error, onDemo }: { error: string; onDemo: () => void }) {
+export function EmptyConversation({ error }: { error: string }) {
   return (
     <div className="welcome">
       <div className="welcome-icon">
@@ -14,9 +13,6 @@ export function EmptyConversation({ error, onDemo }: { error: string; onDemo: ()
           {error}
         </p>
       )}
-      <Button variant="outline" onClick={onDemo}>
-        ดูตัวอย่างบทสนทนา
-      </Button>
     </div>
   );
 }

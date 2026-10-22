@@ -13,24 +13,26 @@ type Props = {
   query: string;
   refreshing: boolean;
   connected: boolean;
-  mode: "live" | "demo";
   onQueryChange: (value: string) => void;
   onSelect: (id: string) => void;
   onRefresh: () => void;
-  onDemo: () => void;
 };
-export function ConversationList({ conversations, selected, query, refreshing, connected, mode, onQueryChange, onSelect, onRefresh, onDemo }: Props) {
+export function ConversationList({ conversations, selected, query, refreshing, connected, onQueryChange, onSelect, onRefresh }: Props) {
   const filtered = conversations.filter((c) => {
     return c.name.toLowerCase().includes(query.trim().toLowerCase());
   });
+  const unreadCount = conversations.reduce((total, conversation) => total + (conversation.unreadCount || 0), 0);
   return (
     <aside className="conversation-list" aria-label="รายชื่อบทสนทนา">
       <div className="list-tabs">
-        <span className="list-tab active">
-          แชททั้งหมด <span>{conversations.length}</span>
-          {conversations.some((conversation) => (conversation.unreadCount || 0) > 0) && (
-            <Badge className="unread-badge" aria-label="ข้อความที่ยังไม่อ่านทั้งหมด">
-              {conversations.reduce((total, conversation) => total + (conversation.unreadCount || 0), 0)}
+        <span className={`list-tab active ${styles.tab}`}>
+          <span className={styles.label}>แชททั้งหมด</span>
+          <span className={styles.count} aria-label={`${conversations.length} บทสนทนา`} title="จำนวนบทสนทนาทั้งหมด">
+            {conversations.length}
+          </span>
+          {unreadCount > 0 && (
+            <Badge className={`unread-badge ${styles.totalUnread}`} aria-label={`${unreadCount} ข้อความที่ยังไม่อ่านทั้งหมด`} title="ข้อความที่ยังไม่อ่านทั้งหมด">
+              {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </span>
@@ -88,10 +90,7 @@ export function ConversationList({ conversations, selected, query, refreshing, c
         )}
       </div>
       <div className="aside-footer">
-        <span>{mode === "demo" ? "โหมดทดลอง ไม่ส่งข้อความจริง" : connected ? "เชื่อมต่อเรียลไทม์" : "ขาดการเชื่อมต่อ · กดรีเฟรช"}</span>
-        <Button variant="ghost" size="sm" onClick={mode === "demo" ? onRefresh : onDemo}>
-          {mode === "demo" ? "ใช้ข้อมูลจริง" : "ดูตัวอย่าง"}
-        </Button>
+        <span>{connected ? "เชื่อมต่อเรียลไทม์" : "ขาดการเชื่อมต่อ · กดรีเฟรช"}</span>
       </div>
     </aside>
   );

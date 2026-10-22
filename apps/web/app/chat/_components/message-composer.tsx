@@ -7,11 +7,10 @@ type Props = {
   draft: string;
   busy: boolean;
   isBlocked: boolean;
-  mode: "live" | "demo";
   onDraftChange: (value: string) => void;
   onSend: (event: FormEvent) => void;
 };
-export function MessageComposer({ draft, busy, isBlocked, mode, onDraftChange, onSend }: Props) {
+export function MessageComposer({ draft, busy, isBlocked, onDraftChange, onSend }: Props) {
   return (
     <form className="composer" onSubmit={onSend}>
       {isBlocked && (
@@ -37,7 +36,7 @@ export function MessageComposer({ draft, busy, isBlocked, mode, onDraftChange, o
         }}
       />
       <div className="composer-actions">
-        <small>{mode === "demo" ? "โหมดทดลอง · ข้อความจะไม่ส่งไปยัง LINE" : "Enter เพื่อส่ง · Shift + Enter เพื่อขึ้นบรรทัดใหม่"}</small>
+        <small>Enter เพื่อส่ง · Shift + Enter เพื่อขึ้นบรรทัดใหม่</small>
         <Button type="submit" className="send-button" disabled={busy || !draft.trim() || isBlocked}>
           <Send size={16} />
           {busy ? "กำลังส่ง…" : "ส่ง"}

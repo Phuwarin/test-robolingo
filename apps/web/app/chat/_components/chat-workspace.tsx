@@ -15,7 +15,7 @@ export function ChatWorkspace() {
         <span>LINE Official Account</span>
         <span className="connection-label">
           <i />
-          {chat.mode === "demo" ? "ข้อมูลตัวอย่าง" : "กล่องข้อความ"}
+          กล่องข้อความ
         </span>
       </header>
       <section className="inbox">
@@ -25,11 +25,9 @@ export function ChatWorkspace() {
           query={chat.query}
           refreshing={chat.refreshing}
           connected={chat.connected}
-          mode={chat.mode}
           onQueryChange={chat.setQuery}
           onSelect={chat.selectConversation}
           onRefresh={() => void chat.refresh()}
-          onDemo={chat.demo}
         />
         <article className="chat-detail" aria-label="บทสนทนา">
           {chat.conversation ? (
@@ -41,10 +39,10 @@ export function ChatWorkspace() {
                 </p>
               )}
               <MessageThread key={chat.selected} name={chat.conversation.name} messages={messages} loading={chat.loadingHistory} />
-              <MessageComposer draft={chat.draft} busy={chat.busy} isBlocked={chat.isBlocked} mode={chat.mode} onDraftChange={chat.setDraft} onSend={chat.send} />
+              <MessageComposer draft={chat.draft} busy={chat.busy} isBlocked={chat.isBlocked} onDraftChange={chat.setDraft} onSend={chat.send} />
             </>
           ) : (
-            <EmptyConversation error={chat.error} onDemo={chat.demo} />
+            <EmptyConversation error={chat.error} />
           )}
         </article>
       </section>

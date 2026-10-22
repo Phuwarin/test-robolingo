@@ -5,29 +5,26 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import { conversationsQuery, messagesQuery } from "@/lib/api-queries";
 import { refreshWorkspace } from "@/lib/realtime-cache";
-import { useChatDemo } from "./use-chat-demo";
 import { useMarkRead } from "./use-mark-read";
 import { useSendMessage } from "./use-send-message";
 
 export function useChat() {
   const client = useQueryClient();
-  const { mode, demoConversations, demoMessages, startDemo, stopDemo, sendDemoMessage } = useChatDemo();
   const router = useRouter();
   const params = useParams<{ id?: string }>();
-  const [demoSelected, setDemoSelected] = useState("");
-  const selected = mode === "demo" ? demoSelected : params.id || "";
+  const selected = params.id || "";
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const connected = useRealtimeStore((state) => state.connected);
-  const list = useQuery({ ...conversationsQuery(), enabled: mode === "live" });
-  const history = useQuery({ ...messagesQuery(selected), enabled: mode === "live" && !!selected });
-  const storedConversations = mode === "demo" ? demoConversations : list.data || [];
-  const messages = mode === "demo" ? demoMessages : history.data || [];
+  const list = useQuery(conversationsQuery());
+  const history = useQuery({ ...messagesQuery(selected), enabled: !!selected });
+  const storedConversations = list.data || [];
+  const messages = history.data || [];
   const conversation = storedConversations.find((item) => item.id === selected);
   const isBlocked = conversation?.friendStatus === "unfollow";
-  const loadingHistory = mode === "live" && !!selected && history.isPending;
-  const readingRoomId = useMarkRead({ mode, selected, messages, loadingHistory, error, historyFailed: !!history.error, setError });
-  const { draft, setDraft, send, busy } = useSendMessage({ mode, selected, connected, isBlocked, setError, sendDemoMessage });
+  const loadingHistory = !!selected && history.isPending;
+  const readingRoomId = useMarkRead({ selected, messages, loadingHistory, error, historyFailed: !!history.error, setError });
+  const { draft, setDraft, send, busy } = useSendMessage({ selected, connected, isBlocked, setError });
   // Hide the transient unread badge while this room is being read; keep server counts in the cache.
   const conversations = storedConversations.map((item) => {
     return item.id === readingRoomId ? { ...item, unreadCount: 0 } : item;
@@ -40,24 +37,14 @@ export function useChat() {
 
   async function refresh() {
     setError("");
-    if (mode === "demo") {
-      stopDemo();
-      router.push("/chat", { scroll: false });
-    }
     await refreshWorkspace(client);
   }
-  function demo() {
-    setDemoSelected(startDemo());
-    setError("");
-  }
   function selectConversation(id: string) {
-    if (mode === "demo") setDemoSelected(id);
-    else router.push(`/chat/${encodeURIComponent(id)}`, { scroll: false });
+    router.push(`/chat/${encodeURIComponent(id)}`, { scroll: false });
     setDraft("");
     setError("");
   }
   return {
-    mode,
     conversations,
     messages,
     selected,
@@ -65,13 +52,12 @@ export function useChat() {
     setQuery,
     draft,
     setDraft,
-    error: error || (mode === "live" ? list.error?.message || history.error?.message || "" : ""),
+    error: error || list.error?.message || history.error?.message || "",
     busy,
     refreshing: list.isFetching,
     loadingHistory,
     connected,
     refresh,
-    demo,
     send,
     conversation,
     isBlocked,

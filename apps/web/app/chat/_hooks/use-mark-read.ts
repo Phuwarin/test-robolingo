@@ -7,7 +7,6 @@ import type { Conversation, ChatMessage } from "@/lib/chat-state";
 import { useRealtimeStore } from "@/stores/realtime-store";
 
 type Options = {
-  mode: "live" | "demo";
   selected: string;
   messages: ChatMessage[];
   loadingHistory: boolean;
@@ -15,12 +14,12 @@ type Options = {
   historyFailed: boolean;
   setError: (error: string) => void;
 };
-export function useMarkRead({ mode, selected, messages, loadingHistory, error, historyFailed, setError }: Options) {
+export function useMarkRead({ selected, messages, loadingHistory, error, historyFailed, setError }: Options) {
   const client = useQueryClient();
   const [viewActive, setViewActive] = useState(false);
   const readInFlight = useRef(new Set<string>());
   const setReadingRoomId = useRealtimeStore((state) => state.setReadingRoomId);
-  const readingRoomId = mode === "live" && viewActive && !loadingHistory && !historyFailed && !error ? selected : "";
+  const readingRoomId = viewActive && !loadingHistory && !historyFailed && !error ? selected : "";
   useEffect(() => {
     setReadingRoomId(readingRoomId);
     return () => setReadingRoomId("");
@@ -59,7 +58,7 @@ export function useMarkRead({ mode, selected, messages, loadingHistory, error, h
   });
   const markRead = readMutation.mutate;
   useEffect(() => {
-    if (mode !== "live" || !selected || !viewActive || loadingHistory) return;
+    if (!selected || !viewActive || loadingHistory) return;
     const messageIds = messages
       .filter((message) => {
         return message.lineUserId === selected && message.direction === "received" && !message.readAt && !readInFlight.current.has(message.id);
@@ -69,7 +68,7 @@ export function useMarkRead({ mode, selected, messages, loadingHistory, error, h
     if (!messageIds.length) return;
     messageIds.forEach((id) => readInFlight.current.add(id));
     markRead({ lineUserId: selected, messageIds });
-  }, [messages, selected, viewActive, mode, loadingHistory, markRead]);
+  }, [messages, selected, viewActive, loadingHistory, markRead]);
 
   return readingRoomId;
 }
